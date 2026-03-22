@@ -1002,7 +1002,7 @@ function shareLink() {
   generateShareImage().then(blob => {
     btn.textContent = origText;
     btn.disabled = false;
-    if (!blob) { shareTextOnly(full, titleText, hashtags, url); return; }
+    if (!blob) { shareTextOnly(full); return; }
 
     const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
 
@@ -1036,13 +1036,13 @@ function shareLink() {
   }).catch(() => {
     btn.textContent = origText;
     btn.disabled = false;
-    shareTextOnly(full, titleText, hashtags, url);
+    shareTextOnly(full);
   });
 }
 
-function shareTextOnly(full, titleText, hashtags, url) {
+function shareTextOnly(full) {
   if (navigator.share) {
-    navigator.share({ title: titleText, text: `${titleText}\n${hashtags}`, url }).catch(() => {});
+    navigator.share({ text: full }).catch(() => {});
   } else {
     navigator.clipboard.writeText(full).then(() => {
       showToast(t('toastLink'));
