@@ -1011,9 +1011,14 @@ function shareLink() {
     try { canShareFiles = navigator.canShare && navigator.canShare({ files: [file] }); } catch(e) {}
 
     if (canShareFiles) {
+      // 텍스트를 클립보드에 미리 복사 (앱이 텍스트를 무시할 수 있으므로)
+      const shareText = `${titleText}\n${hashtags}\n${url}`;
+      navigator.clipboard.writeText(shareText).catch(() => {});
       navigator.share({
-        text: `${titleText}\n${hashtags}\n${url}`,
+        text: shareText,
         files: [file]
+      }).then(() => {
+        showToast(currentLang === 'ja' ? 'テキストもコピー済み！' : currentLang === 'en' ? 'Text also copied!' : '텍스트도 복사됨! 붙여넣기 하세요');
       }).catch(() => {});
     } else {
       // 데스크톱: 이미지를 클립보드에 복사 + 텍스트도 함께
