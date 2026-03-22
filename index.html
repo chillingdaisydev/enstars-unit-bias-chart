@@ -684,9 +684,7 @@ function changeLang(lang) {
   document.getElementById('btn-share').textContent = t('share');
   document.getElementById('btn-reset').textContent = t('reset');
   document.querySelector('.modal-close').textContent = t('close');
-  const params = new URLSearchParams(window.location.search);
-  params.set('lang', lang);
-  history.replaceState(null, '', window.location.pathname + '?' + params.toString());
+  updateURL();
   render();
 }
 
@@ -699,11 +697,7 @@ function detectLang() {
 
 function init() {
   const params = new URLSearchParams(window.location.search);
-  if (params.has('lang')) {
-    currentLang = params.get('lang');
-  } else {
-    currentLang = detectLang();
-  }
+  currentLang = detectLang();
   document.getElementById('lang-select').value = currentLang;
   loadFromURL();
   changeLang(currentLang);
@@ -1012,20 +1006,32 @@ function shareLink() {
 
     const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // 파일 공유 가능 여부 체크 후 시도
+    let canShareFiles = false;
+    try { canShareFiles = navigator.canShare && navigator.canShare({ files: [file] }); } catch(e) {}
+
+    if (canShareFiles) {
       navigator.share({
-        text: `${titleText}\n${hashtags}`,
-        url: url,
+        text: `${titleText}\n${hashtags}\n${url}`,
         files: [file]
       }).catch(() => {});
     } else {
-      // 데스크톱: 이미지 다운로드 + 텍스트 복사
-      fallbackDownload(blob);
-      navigator.clipboard.writeText(full).then(() => {
-        showToast(t('toastLink'));
-      }).catch(() => {
-        prompt('복사하세요:', full);
-      });
+      // 데스크톱: 이미지를 클립보드에 복사 + 텍스트도 함께
+      try {
+        const item = new ClipboardItem({
+          'image/png': blob,
+          'text/plain': new Blob([full], { type: 'text/plain' })
+        });
+        navigator.clipboard.write([item]).then(() => {
+          showToast(currentLang === 'ja' ? '画像とテキストをコピーしました' : currentLang === 'en' ? 'Image & text copied!' : '이미지+텍스트 복사됨!');
+        }).catch(() => {
+          fallbackDownload(blob);
+          navigator.clipboard.writeText(full).then(() => showToast(t('toastLink')));
+        });
+      } catch(e) {
+        fallbackDownload(blob);
+        navigator.clipboard.writeText(full).then(() => showToast(t('toastLink')));
+      }
     }
   }).catch(() => {
     btn.textContent = origText;
