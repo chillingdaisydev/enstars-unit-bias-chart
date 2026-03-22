@@ -1025,33 +1025,20 @@ function shareLink() {
     let canShareFiles = false;
     try { canShareFiles = navigator.canShare && navigator.canShare({ files: [file] }); } catch(e) {}
 
+    // 1) 텍스트를 클립보드에 복사
+    navigator.clipboard.writeText(full).catch(() => {});
+
+    // 2) 이미지는 별도로 공유/다운로드
     if (canShareFiles) {
-      // 텍스트를 클립보드에 미리 복사 (앱이 텍스트를 무시할 수 있으므로)
-      const shareText = `${titleText}\n${hashtags}\n${url}`;
-      navigator.clipboard.writeText(shareText).catch(() => {});
-      navigator.share({
-        text: shareText,
-        files: [file]
-      }).then(() => {
-        showToast(currentLang === 'ja' ? 'テキストもコピー済み！' : currentLang === 'en' ? 'Text also copied!' : '텍스트도 복사됨! 붙여넣기 하세요');
-      }).catch(() => {});
+      navigator.share({ files: [file] }).then(() => {
+        showToast(currentLang === 'ja' ? 'テキストはクリップボードにコピー済み' : currentLang === 'en' ? 'Text copied to clipboard!' : '📋 텍스트 복사됨! 붙여넣기 하세요');
+      }).catch(() => {
+        showToast(currentLang === 'ja' ? 'テキストはクリップボードにコピー済み' : currentLang === 'en' ? 'Text copied to clipboard!' : '📋 텍스트 복사됨! 붙여넣기 하세요');
+      });
     } else {
-      // 데스크톱: 이미지를 클립보드에 복사 + 텍스트도 함께
-      try {
-        const item = new ClipboardItem({
-          'image/png': blob,
-          'text/plain': new Blob([full], { type: 'text/plain' })
-        });
-        navigator.clipboard.write([item]).then(() => {
-          showToast(currentLang === 'ja' ? '画像とテキストをコピーしました' : currentLang === 'en' ? 'Image & text copied!' : '이미지+텍스트 복사됨!');
-        }).catch(() => {
-          fallbackDownload(blob);
-          navigator.clipboard.writeText(full).then(() => showToast(t('toastLink')));
-        });
-      } catch(e) {
-        fallbackDownload(blob);
-        navigator.clipboard.writeText(full).then(() => showToast(t('toastLink')));
-      }
+      // 데스크톱: 이미지 다운로드
+      fallbackDownload(blob);
+      showToast(currentLang === 'ja' ? 'テキストコピー + 画像ダウンロード完了' : currentLang === 'en' ? 'Text copied + image downloaded!' : '📋 텍스트 복사 + 이미지 다운로드 완료!');
     }
   }).catch(() => {
     btn.textContent = origText;
