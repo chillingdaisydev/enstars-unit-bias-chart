@@ -1,0 +1,9 @@
+{
+  "name": "enstar-unit-bias-chart",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start:stats": "node stats-server/server.js",
+    "check:stats": "node --check stats-server/server.js"
+  }
+}

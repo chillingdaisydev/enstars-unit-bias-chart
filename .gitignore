@@ -1,2 +1,4 @@
 .DS_Store
 __pycache__/
+stats-server/data/
+stats-server/*.log

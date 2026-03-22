@@ -343,7 +343,7 @@
 </div>
 
 <div style="text-align:center;padding:8px 20px 0;">
-  <input id="nickname" type="text" placeholder="" oninput="updateTitle()" maxlength="8" style="padding:6px 12px;border-radius:8px;border:1px solid #ccc;font-size:14px;font-family:'Gaegu',cursive;text-align:center;width:180px;">
+  <input id="nickname" type="text" placeholder="" oninput="updateTitle(); updateURL();" maxlength="8" style="padding:6px 12px;border-radius:8px;border:1px solid #ccc;font-size:14px;font-family:'Gaegu',cursive;text-align:center;width:180px;">
 </div>
 
 <div id="capture-area">
@@ -689,12 +689,70 @@ const I18N = {
 
 let currentLang = 'ko';
 let selections = {};
+const STATS_API_BASE = 'https://gateway.chillingdaisy.org/enstar-stats';
+const STATS_SESSION_KEY = 'enstar_stats_session_id';
 
 function t(key) { return I18N[currentLang][key] || key; }
 function tName(id) { return I18N[currentLang].names[id] || id; }
 
+function getNickname() {
+  const input = document.getElementById('nickname');
+  return input ? input.value.trim() : '';
+}
+
+function getSelectionSnapshot() {
+  return { ...selections };
+}
+
+function getSelectionCount() {
+  return Object.keys(selections).length;
+}
+
+function getStatsSessionId() {
+  try {
+    const existing = localStorage.getItem(STATS_SESSION_KEY);
+    if (existing) return existing;
+
+    const newId = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(STATS_SESSION_KEY, newId);
+    return newId;
+  } catch {
+    return 'anonymous-session';
+  }
+}
+
+function sendStatsEvent(eventType, payload = {}) {
+  if (!window.fetch || !STATS_API_BASE) return;
+
+  const body = JSON.stringify({
+    eventType,
+    sessionId: getStatsSessionId(),
+    lang: currentLang,
+    page: window.location.pathname,
+    hasNickname: !!getNickname(),
+    ...payload,
+  });
+
+  try {
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      navigator.sendBeacon(`${STATS_API_BASE}/api/events`, blob);
+      return;
+    }
+
+    fetch(`${STATS_API_BASE}/api/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
 function getTitle() {
-  const nick = document.getElementById('nickname').value.trim();
+  const nick = getNickname();
   return nick ? I18N[currentLang].titleWithName(nick) : I18N[currentLang].titleNoName;
 }
 
@@ -723,12 +781,15 @@ function detectLang() {
 }
 
 function init() {
-  const params = new URLSearchParams(window.location.search);
   currentLang = detectLang();
   document.getElementById('lang-select').value = currentLang;
   loadFromURL();
   changeLang(currentLang);
   render();
+  sendStatsEvent('visit', {
+    selectionCount: getSelectionCount(),
+    selectionCode: encodeSelections(),
+  });
 }
 
 function render() {
@@ -798,10 +859,17 @@ function openModal(unit) {
   noneEl.style.background = '#3a2a2a';
   noneEl.innerHTML = `<div style="height:72px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#888;">-</div><span style="color:#f88;">${t('noSelect')}</span>`;
   noneEl.onclick = () => {
+    const previousCharacterId = selections[unit.id] || '';
     delete selections[unit.id];
     updateURL();
     render();
     modal.classList.remove('active');
+    sendStatsEvent('clear_character', {
+      unitId: unit.id,
+      previousCharacterId,
+      selectionCount: getSelectionCount(),
+      selectionCode: encodeSelections(),
+    });
   };
   charsEl.appendChild(noneEl);
 
@@ -810,10 +878,18 @@ function openModal(unit) {
     el.className = 'modal-char';
     el.innerHTML = `<img src="${member.img}" alt="${tName(member.id)}"><span>${tName(member.id)}</span>`;
     el.onclick = () => {
+      const previousCharacterId = selections[unit.id] || '';
       selections[unit.id] = member.id;
       updateURL();
       render();
       modal.classList.remove('active');
+      sendStatsEvent('select_character', {
+        unitId: unit.id,
+        characterId: member.id,
+        previousCharacterId,
+        selectionCount: getSelectionCount(),
+        selectionCode: encodeSelections(),
+      });
     };
     charsEl.appendChild(el);
   });
@@ -862,7 +938,7 @@ function decodeSelections(code) {
 
 function updateURL() {
   const code = encodeSelections();
-  const nick = document.getElementById('nickname-input') ? document.getElementById('nickname-input').value.trim() : '';
+  const nick = getNickname();
   const params = new URLSearchParams();
   if (code) params.set('s', code);
   if (nick) params.set('n', nick);
@@ -882,7 +958,7 @@ function loadFromURL() {
     });
   }
   if (params.has('n')) {
-    const nickInput = document.getElementById('nickname-input');
+    const nickInput = document.getElementById('nickname');
     if (nickInput) nickInput.value = params.get('n');
   }
 }
@@ -977,6 +1053,11 @@ function saveAsImage() {
     document.body.removeChild(container);
     canvas.toBlob(blob => {
       if (!blob) return;
+      sendStatsEvent('save_image', {
+        selectionCount: getSelectionCount(),
+        selectionCode: encodeSelections(),
+        selections: getSelectionSnapshot(),
+      });
       // 모바일: Web Share API 시도
       if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
         const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
@@ -1008,7 +1089,7 @@ function fallbackDownload(blob) {
 }
 
 function getShareText() {
-  const nickname = document.getElementById('nickname-input') ? document.getElementById('nickname-input').value.trim() : '';
+  const nickname = getNickname();
   const titleText = nickname
     ? (currentLang === 'ja' ? `${nickname}のあんスタ推し` : currentLang === 'en' ? `${nickname}'s Enstars Bias Chart` : `${nickname}의 앙스타 유닛별 최애캐`)
     : (currentLang === 'ja' ? 'あんスタ推し' : currentLang === 'en' ? 'Enstars Unit Bias Chart' : '앙스타 유닛별 최애캐');
@@ -1019,6 +1100,10 @@ function getShareText() {
 
 function shareLink() {
   const { full } = getShareText();
+  sendStatsEvent('share_link', {
+    selectionCount: getSelectionCount(),
+    selectionCode: encodeSelections(),
+  });
   if (navigator.share) {
     navigator.share({ text: full }).catch(() => {});
   } else {
@@ -1127,6 +1212,10 @@ function resetAll() {
   updateURL();
   render();
   showToast(t('toastReset'));
+  sendStatsEvent('reset_all', {
+    selectionCount: 0,
+    selectionCode: '',
+  });
 }
 
 document.addEventListener('keydown', e => {
