@@ -29,6 +29,95 @@ const ALLOWED_EVENT_TYPES = new Set([
   'reset_all',
 ]);
 
+const CHARACTER_LABELS = {
+  eichi: '텐쇼인 에이치',
+  wataru: '히비키 와타루',
+  tori: '히메미야 토리',
+  yuzuru: '후시미 유즈루',
+  subaru: '아케호시 스바루',
+  hokuto: '히다카 호쿠토',
+  makoto: '유우키 마코토',
+  mao: '이사라 마오',
+  chiaki: '모리사와 치아키',
+  kanata: '신카이 카나타',
+  tetora: '나구모 테토라',
+  midori: '타카미네 미도리',
+  shinobu: '센고쿠 시노부',
+  hiiro: '아마기 히이로',
+  aira: '시라토리 아이라',
+  mayoi: '아야세 마요이',
+  tatsumi: '카제하야 타츠미',
+  nagisa: '란 나기사',
+  hiyori: '토모에 히요리',
+  ibara: '사에구사 이바라',
+  jun: '사자나미 쥰',
+  shu: '이츠키 슈',
+  mika: '카게히라 미카',
+  hinata: '아오이 히나타',
+  yuta: '아오이 유우타',
+  rinne: '아마기 린네',
+  himeru: 'HiMERU',
+  kohaku: '오우카와 코하쿠',
+  niki: '시이나 니키',
+  rei: '사쿠마 레이',
+  kaoru: '하카제 카오루',
+  koga: '오가미 코가',
+  adonis: '오토가리 아도니스',
+  nazuna: '니토 나즈나',
+  mitsuru: '텐마 미츠루',
+  hajime: '시노 하지메',
+  tomoya: '마시로 토모야',
+  keito: '하스미 케이토',
+  kuro: '키류 쿠로',
+  souma: '칸자키 소우마',
+  ibuki: '타키 이부키',
+  chitose: '츠즈라 치토세',
+  juis: '코지카 쥬이스',
+  mashu: '쿠온 마슈',
+  nozomi: '마도카 노조미',
+  leo: '츠키나가 레오',
+  izumi: '세나 이즈미',
+  arashi: '나루카미 아라시',
+  ritsu: '사쿠마 리츠',
+  tsukasa: '스오우 츠카사',
+  natsume: '사카사키 나츠메',
+  tsumugi: '아오바 츠무기',
+  sora: '하루카와 소라',
+  madara: '미케지마 마다라',
+  esu: '에스',
+  kanna: '칸나',
+  raika: '라이카',
+  yume: '유메',
+  jin: '사가미 진',
+  akiomi: '쿠누기 아키오미',
+  nice: '나이스',
+  kaname: '토죠 카나메',
+  gatekeeper: '게이트 키퍼',
+  seiya: '히다카 세이야',
+  hitsugi: '쿠로네 히츠기',
+  anzu: '안즈',
+};
+
+const UNIT_LABELS = {
+  fine: 'fine',
+  trickstar: 'Trickstar',
+  ryuseitai: 'RYUSEITAI',
+  alkaloid: 'ALKALOID',
+  eden: 'Eden',
+  valkyrie: 'Valkyrie',
+  '2wink': '2wink',
+  crazyb: 'Crazy:B',
+  undead: 'UNDEAD',
+  rabits: 'Ra*bits',
+  akatsuki: 'AKATSUKI',
+  melodious: 'Mellow Dear Us',
+  knights: 'Knights',
+  switch: 'Switch',
+  mam: 'MaM',
+  esprit: 'ESPRIT',
+  others: '기타',
+};
+
 fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(EVENTS_FILE)) {
   fs.writeFileSync(EVENTS_FILE, '');
@@ -92,6 +181,13 @@ function sortedEntries(map, limit = 20) {
     .map(([key, count]) => ({ key, count }));
 }
 
+function labelEntries(items, labels) {
+  return items.map((item) => ({
+    ...item,
+    label: labels[item.key] || item.key,
+  }));
+}
+
 function safeObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 }
@@ -144,10 +240,10 @@ function summarizeEvents() {
   }
 
   summary.uniqueSessions = sessions.size;
-  summary.topSelectedCharacters = sortedEntries(summary.selectedCharacters);
-  summary.topSavedCharacters = sortedEntries(summary.savedCharacters);
-  summary.topSelectedUnits = sortedEntries(summary.selectedUnits);
-  summary.topSavedUnits = sortedEntries(summary.savedUnits);
+  summary.topSelectedCharacters = labelEntries(sortedEntries(summary.selectedCharacters, 5), CHARACTER_LABELS);
+  summary.topSavedCharacters = labelEntries(sortedEntries(summary.savedCharacters, 5), CHARACTER_LABELS);
+  summary.topSelectedUnits = labelEntries(sortedEntries(summary.selectedUnits, 5), UNIT_LABELS);
+  summary.topSavedUnits = labelEntries(sortedEntries(summary.savedUnits, 5), UNIT_LABELS);
   summary.recentDays = sortedEntries(summary.dailyEvents, 14);
 
   return summary;
@@ -158,7 +254,7 @@ function buildDashboardHtml(summary) {
     if (!items.length) {
       return `<tr><td colspan="2">${emptyLabel}</td></tr>`;
     }
-    return items.map((item) => `<tr><td>${item.key}</td><td>${item.count}</td></tr>`).join('');
+    return items.map((item) => `<tr><td>${item.label || item.key}</td><td>${item.count}</td></tr>`).join('');
   };
 
   return `<!DOCTYPE html>
@@ -189,16 +285,20 @@ function buildDashboardHtml(summary) {
     <div class="card"><div>Visits</div><div class="metric">${summary.byType.visit || 0}</div></div>
     <div class="card"><div>Saved Images</div><div class="metric">${summary.byType.save_image || 0}</div></div>
     <div class="card">
-      <div>Top Selected Characters</div>
+      <div>Top 5 Selected Characters</div>
       <table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSelectedCharacters, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
-      <div>Top Saved Characters</div>
+      <div>Top 5 Saved Characters</div>
       <table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSavedCharacters, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
-      <div>Top Selected Units</div>
+      <div>Top 5 Selected Units</div>
       <table><thead><tr><th>Unit</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSelectedUnits, 'No data yet')}</tbody></table>
+    </div>
+    <div class="card">
+      <div>Top 5 Saved Units</div>
+      <table><thead><tr><th>Unit</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSavedUnits, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
       <div>Recent Days</div>
