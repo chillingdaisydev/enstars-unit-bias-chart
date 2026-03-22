@@ -860,7 +860,7 @@ function saveAsImage() {
         if (member) {
           const chibi = document.createElement('img');
           chibi.src = member.img;
-          chibi.style.cssText = 'height:190px;object-fit:contain;position:relative;z-index:2;';
+          chibi.style.cssText = 'height:190px;width:auto;object-fit:contain;position:relative;z-index:2;';
           card.appendChild(chibi);
         }
       }
@@ -869,7 +869,7 @@ function saveAsImage() {
       if (unit.logo) {
         const logo = document.createElement('img');
         logo.src = unit.logo;
-        logo.style.cssText = `position:absolute;bottom:2px;left:2px;height:32px;max-width:72px;object-fit:contain;opacity:${hasSel ? '0.5' : '0.35'};pointer-events:none;z-index:1;`;
+        logo.style.cssText = `position:absolute;bottom:2px;left:2px;height:32px;width:auto;max-width:72px;object-fit:contain;opacity:${hasSel ? '0.5' : '0.35'};pointer-events:none;z-index:1;`;
         card.appendChild(logo);
       }
 
