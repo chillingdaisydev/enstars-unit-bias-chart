@@ -264,15 +264,45 @@ function buildDashboardHtml(summary) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enstar Stats</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 32px; background: #f6f7fb; color: #1f2937; }
-    h1 { margin-bottom: 8px; }
-    p { color: #6b7280; }
+    :root {
+      color-scheme: dark;
+      --bg: #0a0f1a;
+      --bg-accent: #121a2b;
+      --card: rgba(18, 26, 43, 0.88);
+      --card-border: rgba(148, 163, 184, 0.16);
+      --text: #eef2ff;
+      --muted: #9aa6c5;
+      --line: rgba(148, 163, 184, 0.14);
+      --glow: rgba(56, 189, 248, 0.18);
+      --metric: #8be9fd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 32px;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.14), transparent 24%),
+        linear-gradient(180deg, var(--bg-accent), var(--bg));
+      min-height: 100vh;
+    }
+    h1 { margin-bottom: 8px; letter-spacing: 0.02em; }
+    p { color: var(--muted); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
-    .card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); }
-    .metric { font-size: 28px; font-weight: 700; margin-top: 10px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+    }
+    .metric { font-size: 30px; font-weight: 800; margin-top: 10px; color: var(--metric); text-shadow: 0 0 24px var(--glow); }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { text-align: left; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-    th { font-size: 13px; color: #6b7280; }
+    th, td { text-align: left; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    th { font-size: 13px; color: var(--muted); }
+    td { color: var(--text); }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   </style>
 </head>
