@@ -861,7 +861,7 @@ function saveAsImage() {
           const chibi = document.createElement('img');
           chibi.src = member.img;
           const isCircle = member.img.includes('Circle');
-          chibi.style.cssText = `height:${isCircle ? '80px' : '190px'};width:auto;object-fit:contain;position:relative;z-index:2;`;
+          chibi.style.cssText = `height:${isCircle ? '120px' : '190px'};width:auto;object-fit:contain;position:relative;z-index:2;`;
           card.appendChild(chibi);
         }
       }
