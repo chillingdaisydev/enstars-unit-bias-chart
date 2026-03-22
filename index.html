@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>앙스타 유닛별 최애캐 고르기</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Black+Han+Sans&family=Gaegu:wght@700&display=swap');
@@ -908,14 +908,36 @@ function saveAsImage() {
     windowWidth: actualW,
   }).then(canvas => {
     document.body.removeChild(container);
-    const link = document.createElement('a');
-    link.download = 'enstar_favorites.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast(t('toastSaved'));
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      // 모바일: Web Share API 시도
+      if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
+        navigator.share({ files: [file] }).then(() => {
+          showToast(t('toastSaved'));
+        }).catch(() => {
+          // share 취소 시 fallback
+          fallbackDownload(blob);
+        });
+      } else {
+        fallbackDownload(blob);
+      }
+    }, 'image/png');
   }).catch(() => {
     document.body.removeChild(container);
   });
+}
+
+function fallbackDownload(blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.download = 'enstar_favorites.png';
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(t('toastSaved'));
 }
 
 function shareLink() {
