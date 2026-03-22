@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>앙스타 유닛별 최애캐 고르기</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Black+Han+Sans&family=Gaegu:wght@700&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -19,8 +19,9 @@
   h1 {
     text-align: center;
     padding: 32px 0 8px;
-    font-size: 28px;
-    font-weight: 900;
+    font-size: 30px;
+    font-family: 'Gaegu', cursive;
+    font-weight: 700;
     letter-spacing: 2px;
   }
 
@@ -102,7 +103,7 @@
 
   .units-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     padding: 1px;
   }
@@ -110,7 +111,7 @@
   .unit-card {
     background: #f0f2f8;
     border-radius: 8px;
-    padding: 6px 4px;
+    padding: 6px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -293,7 +294,7 @@
 
   @media (max-width: 600px) {
     .units-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
     .modal-chars {
       grid-template-columns: repeat(3, 1fr);
@@ -303,16 +304,32 @@
 </head>
 <body>
 
+<div style="text-align:right;padding:8px 20px 0;">
+  <select id="lang-select" onchange="changeLang(this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;cursor:pointer;">
+    <option value="ko">🇰🇷 한국어</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <option value="en">🇺🇸 English</option>
+  </select>
+</div>
+
+<div style="text-align:center;padding:8px 20px 0;">
+  <input id="nickname" type="text" placeholder="" oninput="updateTitle()" maxlength="8" style="padding:6px 12px;border-radius:8px;border:1px solid #ccc;font-size:14px;font-family:'Gaegu',cursive;text-align:center;width:180px;">
+</div>
+
 <div id="capture-area">
-  <h1>앙스타 유닛별 최애캐</h1>
-  <p class="subtitle">각 유닛을 클릭해서 최애캐를 골라보세요!</p>
+  <h1 id="main-title">⭐ 앙스타 유닛별 최애캐 ⭐</h1>
+  <p class="subtitle" id="subtitle">각 유닛을 클릭해서 최애캐를 골라보세요!</p>
   <div id="app"></div>
 </div>
 
 <div class="actions">
-  <button class="btn-save" onclick="saveAsImage()">이미지 저장</button>
-  <button class="btn-share" onclick="shareLink()">링크 공유</button>
-  <button class="btn-reset" onclick="resetAll()">초기화</button>
+  <button class="btn-save" onclick="saveAsImage()" id="btn-save">이미지 저장</button>
+  <button class="btn-share" onclick="shareLink()" id="btn-share">링크 공유</button>
+  <button class="btn-reset" onclick="resetAll()" id="btn-reset">초기화</button>
+</div>
+
+<div style="text-align:center;padding:12px 0 20px;">
+  <a href="https://chillingdaisydev.github.io/enstars-unit-bias-chart/" style="color:#aaa;font-size:11px;text-decoration:none;">chillingdaisydev.github.io/enstars-unit-bias-chart</a>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
@@ -517,10 +534,146 @@ const DATA = {
   ]
 };
 
+const I18N = {
+  ko: {
+    title: '⭐ 앙스타 유닛별 최애캐 ⭐',
+    subtitle: '각 유닛을 클릭해서 최애캐를 골라보세요!',
+    save: '이미지 저장', share: '링크 공유', reset: '초기화',
+    close: '닫기', noSelect: '선택 안함',
+    toastSaved: '이미지가 저장되었습니다!',
+    toastLink: '링크가 복사되었습니다!',
+    toastReset: '초기화되었습니다',
+    nickPlaceholder: '닉네임 입력',
+    titleWithName: (name) => `${name}의<br>⭐ 앙스타 유닛별 최애캐 ⭐`,
+    titleNoName: '⭐ 앙스타 유닛별 최애캐 ⭐',
+    names: {
+      eichi: '텐쇼인 에이치', wataru: '히비키 와타루', tori: '히메미야 토리', yuzuru: '후시미 유즈루',
+      subaru: '아케호시 스바루', hokuto: '히다카 호쿠토', makoto: '유우키 마코토', mao: '이사라 마오',
+      chiaki: '모리사와 치아키', kanata: '신카이 카나타', tetora: '나구모 테토라', midori: '타카미네 미도리', shinobu: '센고쿠 시노부',
+      hiiro: '아마기 히이로', aira: '시라토리 아이라', mayoi: '아야세 마요이', tatsumi: '카제하야 타츠미',
+      nagisa: '란 나기사', hiyori: '토모에 히요리', ibara: '사에구사 이바라', jun: '사자나미 쥰',
+      shu: '이츠키 슈', mika: '카게히라 미카',
+      hinata: '아오이 히나타', yuta: '아오이 유타',
+      rinne: '아마기 린네', himeru: 'HiMERU', kohaku: '오우카와 코하쿠', niki: '시이나 니키',
+      rei: '사쿠마 레이', kaoru: '하카제 카오루', koga: '오가미 코가', adonis: '오토가리 아도니스',
+      nazuna: '니토 나즈나', mitsuru: '텐마 미츠루', hajime: '시노 하지메', tomoya: '마시로 토모야',
+      keito: '하스미 케이토', kuro: '키류 쿠로', souma: '칸자키 소우마', ibuki: '타키 이부키',
+      chitose: '츠즈라 치토세', juis: '코지카 쥬이스', mashu: '쿠온 마슈', nozomi: '마도카 노조미',
+      leo: '츠키나가 레오', izumi: '세나 이즈미', arashi: '나루카미 아라시', ritsu: '사쿠마 리츠', tsukasa: '스오우 츠카사',
+      natsume: '사카사키 나츠메', tsumugi: '아오바 츠무기', sora: '하루카와 소라',
+      madara: '미케지마 마다라',
+      esu: '에스', kanna: '칸나', raika: '라이카', yume: '유메',
+    }
+  },
+  ja: {
+    title: '⭐ あんスタ ユニット別推し ⭐',
+    subtitle: 'ユニットをクリックして推しを選んでね！',
+    save: '画像保存', share: 'リンク共有', reset: 'リセット',
+    close: '閉じる', noSelect: '選択しない',
+    toastSaved: '画像を保存しました！',
+    toastLink: 'リンクをコピーしました！',
+    toastReset: 'リセットしました',
+    nickPlaceholder: 'ニックネーム入力',
+    titleWithName: (name) => `${name}の<br>⭐ あんスタ ユニット別推し ⭐`,
+    titleNoName: '⭐ あんスタ ユニット別推し ⭐',
+    names: {
+      eichi: '天祥院英智', wataru: '日々樹渉', tori: '姫宮桃李', yuzuru: '伏見弓弦',
+      subaru: '明星スバル', hokuto: '氷鷹北斗', makoto: '遊木真', mao: '衣更真緒',
+      chiaki: '守沢千秋', kanata: '深海奏汰', tetora: '南雲鉄虎', midori: '高峯翠', shinobu: '仙石忍',
+      hiiro: '天城一彩', aira: '白鳥藍良', mayoi: '綾瀬マヨイ', tatsumi: '風早巽',
+      nagisa: '乱凪砂', hiyori: '巴日和', ibara: '七種茨', jun: '漣ジュン',
+      shu: '斎宮宗', mika: '影片みか',
+      hinata: '葵ひなた', yuta: '葵ゆうた',
+      rinne: '天城燐音', himeru: 'HiMERU', kohaku: '大川琥珀', niki: '椎名ニキ',
+      rei: '朔間零', kaoru: '羽風薫', koga: '大神晃牙', adonis: '乙狩アドニス',
+      nazuna: '仁兎なずな', mitsuru: '天満光', hajime: '紫之創', tomoya: '真白友也',
+      keito: '蓮巳敬人', kuro: '鬼龍紅郎', souma: '神崎颯馬', ibuki: '瀧嵐',
+      chitose: '葛葉千歳', juis: '小鹿寿維斗', mashu: '久遠真周', nozomi: '円香希',
+      leo: '月永レオ', izumi: '瀬名泉', arashi: '鳴上嵐', ritsu: '朔間凛月', tsukasa: '朱桜司',
+      natsume: '逆先夏目', tsumugi: '青葉つむぎ', sora: '春川宙',
+      madara: '三毛縞斑',
+      esu: 'エス', kanna: '神流', raika: '雷佳', yume: 'ゆめ',
+    }
+  },
+  en: {
+    title: '⭐ Enstars Unit Bias Chart ⭐',
+    subtitle: 'Click a unit to pick your favorite!',
+    save: 'Save Image', share: 'Share Link', reset: 'Reset',
+    close: 'Close', noSelect: 'No Selection',
+    toastSaved: 'Image saved!',
+    toastLink: 'Link copied!',
+    toastReset: 'Reset complete',
+    nickPlaceholder: 'Enter nickname',
+    titleWithName: (name) => `${name}'s<br>⭐ Enstars Unit Bias ⭐`,
+    titleNoName: '⭐ Enstars Unit Bias Chart ⭐',
+    names: {
+      eichi: 'Eichi Tenshouin', wataru: 'Wataru Hibiki', tori: 'Tori Himemiya', yuzuru: 'Yuzuru Fushimi',
+      subaru: 'Subaru Akehoshi', hokuto: 'Hokuto Hidaka', makoto: 'Makoto Yuuki', mao: 'Mao Isara',
+      chiaki: 'Chiaki Morisawa', kanata: 'Kanata Shinkai', tetora: 'Tetora Nagumo', midori: 'Midori Takamine', shinobu: 'Shinobu Sengoku',
+      hiiro: 'Hiiro Amagi', aira: 'Aira Shiratori', mayoi: 'Mayoi Ayase', tatsumi: 'Tatsumi Kazehaya',
+      nagisa: 'Nagisa Ran', hiyori: 'Hiyori Tomoe', ibara: 'Ibara Saegusa', jun: 'Jun Sazanami',
+      shu: 'Shu Itsuki', mika: 'Mika Kagehira',
+      hinata: 'Hinata Aoi', yuta: 'Yuta Aoi',
+      rinne: 'Rinne Amagi', himeru: 'HiMERU', kohaku: 'Kohaku Oukawa', niki: 'Niki Shiina',
+      rei: 'Rei Sakuma', kaoru: 'Kaoru Hakaze', koga: 'Koga Oogami', adonis: 'Adonis Otogari',
+      nazuna: 'Nazuna Nito', mitsuru: 'Mitsuru Tenma', hajime: 'Hajime Shino', tomoya: 'Tomoya Mashiro',
+      keito: 'Keito Hasumi', kuro: 'Kuro Kiryu', souma: 'Souma Kanzaki', ibuki: 'Ibuki Taki',
+      chitose: 'Chitose Tsuzura', juis: 'Juis Kojika', mashu: 'Mashu Kuon', nozomi: 'Nozomi Madoka',
+      leo: 'Leo Tsukinaga', izumi: 'Izumi Sena', arashi: 'Arashi Narukami', ritsu: 'Ritsu Sakuma', tsukasa: 'Tsukasa Suou',
+      natsume: 'Natsume Sakasaki', tsumugi: 'Tsumugi Aoba', sora: 'Sora Harukawa',
+      madara: 'Madara Mikejima',
+      esu: 'Esu', kanna: 'Kanna', raika: 'Raika', yume: 'Yume',
+    }
+  }
+};
+
+let currentLang = 'ko';
 let selections = {};
 
+function t(key) { return I18N[currentLang][key] || key; }
+function tName(id) { return I18N[currentLang].names[id] || id; }
+
+function getTitle() {
+  const nick = document.getElementById('nickname').value.trim();
+  return nick ? I18N[currentLang].titleWithName(nick) : I18N[currentLang].titleNoName;
+}
+
+function updateTitle() {
+  document.getElementById('main-title').innerHTML = getTitle();
+}
+
+function changeLang(lang) {
+  currentLang = lang;
+  document.getElementById('nickname').placeholder = t('nickPlaceholder');
+  updateTitle();
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('btn-save').textContent = t('save');
+  document.getElementById('btn-share').textContent = t('share');
+  document.getElementById('btn-reset').textContent = t('reset');
+  document.querySelector('.modal-close').textContent = t('close');
+  const params = new URLSearchParams(window.location.search);
+  params.set('lang', lang);
+  history.replaceState(null, '', window.location.pathname + '?' + params.toString());
+  render();
+}
+
+function detectLang() {
+  const browserLang = (navigator.language || navigator.userLanguage || 'ko').toLowerCase();
+  if (browserLang.startsWith('ja')) return 'ja';
+  if (browserLang.startsWith('en')) return 'en';
+  return 'ko';
+}
+
 function init() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('lang')) {
+    currentLang = params.get('lang');
+  } else {
+    currentLang = detectLang();
+  }
+  document.getElementById('lang-select').value = currentLang;
   loadFromURL();
+  changeLang(currentLang);
   render();
 }
 
@@ -546,13 +699,14 @@ function render() {
       card.className = 'unit-card' + (selections[unit.id] ? ' selected' : '');
       card.onclick = () => openModal(unit);
 
-      let content = `<img class="unit-logo" src="${unit.logo}" alt="${unit.name}">`;
+      const logoScale = (unit.id === 'valkyrie' || unit.id === 'alkaloid') ? 'height:35px;max-width:60%;' : (unit.id === 'undead' || unit.id === 'rabits') ? 'height:38px;max-width:65%;' : '';
+      let content = `<img class="unit-logo" src="${unit.logo}" alt="${unit.name}" style="${logoScale}">`;
 
       if (selections[unit.id]) {
         const member = unit.members.find(m => m.id === selections[unit.id]);
         if (member) {
-          content += `<img class="unit-chibi" src="${member.img}" alt="${member.name}">`;
-          content += `<div class="char-name">${member.name}</div>`;
+          content += `<img class="unit-chibi" src="${member.img}" alt="${tName(member.id)}">`;
+          content += `<div class="char-name">${tName(member.id)}</div>`;
         }
       }
 
@@ -577,7 +731,7 @@ function openModal(unit) {
   const noneEl = document.createElement('div');
   noneEl.className = 'modal-char';
   noneEl.style.background = '#3a2a2a';
-  noneEl.innerHTML = `<div style="height:72px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#888;">-</div><span style="color:#f88;">선택 안함</span>`;
+  noneEl.innerHTML = `<div style="height:72px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#888;">-</div><span style="color:#f88;">${t('noSelect')}</span>`;
   noneEl.onclick = () => {
     delete selections[unit.id];
     updateURL();
@@ -589,7 +743,7 @@ function openModal(unit) {
   unit.members.forEach(member => {
     const el = document.createElement('div');
     el.className = 'modal-char';
-    el.innerHTML = `<img src="${member.img}" alt="${member.name}"><span>${member.name}</span>`;
+    el.innerHTML = `<img src="${member.img}" alt="${tName(member.id)}"><span>${tName(member.id)}</span>`;
     el.onclick = () => {
       selections[unit.id] = member.id;
       updateURL();
@@ -634,20 +788,20 @@ function showToast(msg) {
 function saveAsImage() {
   // 캡처 전용 영역을 고정 너비로 생성
   const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:400px;box-sizing:border-box;background:#e8ecf4;padding:10px 2px 14px;font-family:"Noto Sans KR",sans-serif;overflow:hidden;';
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:600px;box-sizing:border-box;background:#fff;padding:4px 16px 0;font-family:"Noto Sans KR",sans-serif;overflow:hidden;';
 
   const title = document.createElement('h1');
-  title.textContent = '앙스타 유닛별 최애캐';
-  title.style.cssText = 'text-align:center;font-size:18px;font-weight:900;color:#222;margin:0 0 8px;letter-spacing:2px;';
+  title.innerHTML = getTitle();
+  title.style.cssText = 'text-align:center;font-size:30px;font-family:"Gaegu",cursive;font-weight:700;color:#222;margin:4px 0 8px;letter-spacing:4px;';
   container.appendChild(title);
 
   DATA.agencies.forEach(agency => {
     const section = document.createElement('div');
-    section.style.cssText = 'margin-bottom:4px;border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);';
+    section.style.cssText = 'margin-bottom:16px;border-radius:8px;overflow:hidden;background:#fff;';
 
     const header = document.createElement('div');
-    header.style.cssText = `display:flex;align-items:center;padding:4px 10px;gap:8px;background:${agency.color};`;
-    header.innerHTML = `<img src="${agency.logo}" style="height:20px;object-fit:contain;"><span style="font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#fff;">${agency.name}</span>`;
+    header.style.cssText = `display:flex;align-items:center;padding:4px 16px;gap:10px;background:${agency.color};`;
+    header.innerHTML = `<img src="${agency.logo}" style="height:28px;object-fit:contain;"><span style="font-size:14px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff;">${agency.name}</span>`;
     section.appendChild(header);
 
     const grid = document.createElement('div');
@@ -655,27 +809,25 @@ function saveAsImage() {
 
     agency.units.forEach(unit => {
       const card = document.createElement('div');
-      card.style.cssText = 'background:#f0f2f8;padding:2px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;position:relative;overflow:hidden;';
+      card.style.cssText = 'background:#fff;padding:2px 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;position:relative;overflow:visible;';
 
-      const logo = document.createElement('img');
-      logo.src = unit.logo;
       const hasSel = !!selections[unit.id];
-      logo.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:30px;max-width:80%;object-fit:contain;opacity:${hasSel ? '0.12' : '0.3'};pointer-events:none;`;
-      card.appendChild(logo);
 
       if (hasSel) {
         const member = unit.members.find(m => m.id === selections[unit.id]);
         if (member) {
           const chibi = document.createElement('img');
           chibi.src = member.img;
-          chibi.style.cssText = 'height:62px;object-fit:contain;position:relative;z-index:1;';
+          chibi.style.cssText = 'height:190px;object-fit:contain;position:relative;z-index:2;';
           card.appendChild(chibi);
-          const name = document.createElement('div');
-          name.textContent = member.name;
-          name.style.cssText = 'font-size:8px;color:#666;margin-top:1px;position:relative;z-index:1;text-align:center;';
-          card.appendChild(name);
         }
       }
+
+      // 유닛 로고를 좌하단에 작게 (캐릭터 뒤에)
+      const logo = document.createElement('img');
+      logo.src = unit.logo;
+      logo.style.cssText = `position:absolute;bottom:2px;left:2px;height:32px;max-width:72px;object-fit:contain;opacity:${hasSel ? '0.5' : '0.35'};pointer-events:none;z-index:1;`;
+      card.appendChild(logo);
 
       grid.appendChild(card);
     });
@@ -684,12 +836,17 @@ function saveAsImage() {
     container.appendChild(section);
   });
 
+  const footer = document.createElement('div');
+  footer.textContent = 'chillingdaisydev.github.io/enstars-unit-bias-chart';
+  footer.style.cssText = 'text-align:center;font-size:12px;color:#bbb;margin-top:20px;';
+  container.appendChild(footer);
+
   document.body.appendChild(container);
 
   const actualW = container.offsetWidth;
   const actualH = container.offsetHeight;
   html2canvas(container, {
-    backgroundColor: '#e8ecf4',
+    backgroundColor: '#fff',
     scale: 2,
     useCORS: true,
     width: actualW,
@@ -701,7 +858,7 @@ function saveAsImage() {
     link.download = 'enstar_favorites.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
-    showToast('이미지가 저장되었습니다!');
+    showToast(t('toastSaved'));
   }).catch(() => {
     document.body.removeChild(container);
   });
@@ -710,7 +867,7 @@ function saveAsImage() {
 function shareLink() {
   const url = window.location.href;
   navigator.clipboard.writeText(url).then(() => {
-    showToast('링크가 복사되었습니다!');
+    showToast(t('toastLink'));
   }).catch(() => {
     prompt('링크를 복사하세요:', url);
   });
@@ -720,7 +877,7 @@ function resetAll() {
   selections = {};
   updateURL();
   render();
-  showToast('초기화되었습니다');
+  showToast(t('toastReset'));
 }
 
 document.addEventListener('keydown', e => {
