@@ -944,11 +944,24 @@ function fallbackDownload(blob) {
 
 function shareLink() {
   const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
-    showToast(t('toastLink'));
-  }).catch(() => {
-    prompt('링크를 복사하세요:', url);
-  });
+  const nickname = document.getElementById('nickname-input') ? document.getElementById('nickname-input').value.trim() : '';
+  const titleText = nickname
+    ? (currentLang === 'ja' ? `${nickname}のあんスタ推し` : currentLang === 'en' ? `${nickname}'s Enstars Bias Chart` : `${nickname}의 앙스타 유닛별 최애캐`)
+    : (currentLang === 'ja' ? 'あんスタ推し' : currentLang === 'en' ? 'Enstars Unit Bias Chart' : '앙스타 유닛별 최애캐');
+
+  if (navigator.share) {
+    navigator.share({
+      title: titleText,
+      text: titleText,
+      url: url
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(titleText + '\n' + url).then(() => {
+      showToast(t('toastLink'));
+    }).catch(() => {
+      prompt('복사하세요:', titleText + '\n' + url);
+    });
+  }
 }
 
 function resetAll() {
