@@ -1006,44 +1006,11 @@ function getShareText() {
 }
 
 function shareLink() {
-  const { titleText, hashtags, url, full } = getShareText();
-
-  // 이미지 캡처 후 공유
-  const btn = document.getElementById('btn-share');
-  const origText = btn.textContent;
-  btn.textContent = '⏳';
-  btn.disabled = true;
-
-  generateShareImage().then(blob => {
-    btn.textContent = origText;
-    btn.disabled = false;
-    if (!blob) { shareTextOnly(full); return; }
-
-    const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
-
-    // 파일 공유 가능 여부 체크 후 시도
-    let canShareFiles = false;
-    try { canShareFiles = navigator.canShare && navigator.canShare({ files: [file] }); } catch(e) {}
-
-    // 1) 텍스트를 클립보드에 복사
-    navigator.clipboard.writeText(full).catch(() => {});
-
-    // 2) 이미지는 별도로 공유/다운로드
-    if (canShareFiles) {
-      navigator.share({ files: [file] }).then(() => {
-        showToast(currentLang === 'ja' ? 'テキストはクリップボードにコピー済み' : currentLang === 'en' ? 'Text copied to clipboard!' : '📋 텍스트 복사됨! 붙여넣기 하세요');
-      }).catch(() => {
-        showToast(currentLang === 'ja' ? 'テキストはクリップボードにコピー済み' : currentLang === 'en' ? 'Text copied to clipboard!' : '📋 텍스트 복사됨! 붙여넣기 하세요');
-      });
-    } else {
-      // 데스크톱: 이미지 다운로드
-      fallbackDownload(blob);
-      showToast(currentLang === 'ja' ? 'テキストコピー + 画像ダウンロード完了' : currentLang === 'en' ? 'Text copied + image downloaded!' : '📋 텍스트 복사 + 이미지 다운로드 완료!');
-    }
+  const { full } = getShareText();
+  navigator.clipboard.writeText(full).then(() => {
+    showToast(currentLang === 'ja' ? '📋 コピーしました' : currentLang === 'en' ? '📋 Copied!' : '📋 복사됨!');
   }).catch(() => {
-    btn.textContent = origText;
-    btn.disabled = false;
-    shareTextOnly(full);
+    prompt('복사하세요:', full);
   });
 }
 
