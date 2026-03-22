@@ -736,18 +736,20 @@ function sendStatsEvent(eventType, payload = {}) {
   });
 
   try {
-    if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: 'application/json' });
-      navigator.sendBeacon(`${STATS_API_BASE}/api/events`, blob);
-      return;
-    }
-
     fetch(`${STATS_API_BASE}/api/events`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
       keepalive: true,
-    }).catch(() => {});
+      mode: 'cors',
+      credentials: 'omit',
+      cache: 'no-store',
+    }).catch(() => {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon(`${STATS_API_BASE}/api/events`, blob);
+      }
+    });
   } catch {}
 }
 
