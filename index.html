@@ -744,6 +744,15 @@ function render() {
       grid.appendChild(card);
     });
 
+    // Fill remaining cells to maintain 4-column layout
+    const remainder = agency.units.length % 4;
+    if (remainder > 0) {
+      for (let i = 0; i < 4 - remainder; i++) {
+        const empty = document.createElement('div');
+        grid.appendChild(empty);
+      }
+    }
+
     section.appendChild(grid);
     app.appendChild(section);
   });
