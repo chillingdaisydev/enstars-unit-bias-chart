@@ -806,20 +806,64 @@ function closeModal(e) {
   }
 }
 
-function updateURL() {
-  const params = new URLSearchParams();
-  Object.entries(selections).forEach(([unit, member]) => {
-    params.set(unit, member);
+// 유닛/멤버 순서 기반 압축 인코딩
+function getAllUnits() {
+  const units = [];
+  DATA.agencies.forEach(a => a.units.forEach(u => units.push(u)));
+  return units;
+}
+
+function encodeSelections() {
+  const units = getAllUnits();
+  let code = '';
+  let hasAny = false;
+  units.forEach(u => {
+    if (!selections[u.id]) { code += '-'; return; }
+    const idx = u.members.findIndex(m => m.id === selections[u.id]);
+    if (idx === -1) { code += '-'; return; }
+    code += idx.toString(36); // 0-9, a-z
+    hasAny = true;
   });
+  if (!hasAny) return '';
+  return code.replace(/-+$/, ''); // 뒤쪽 - 제거
+}
+
+function decodeSelections(code) {
+  const units = getAllUnits();
+  for (let i = 0; i < code.length && i < units.length; i++) {
+    if (code[i] === '-') continue;
+    const idx = parseInt(code[i], 36);
+    if (idx >= 0 && idx < units[i].members.length) {
+      selections[units[i].id] = units[i].members[idx].id;
+    }
+  }
+}
+
+function updateURL() {
+  const code = encodeSelections();
+  const nick = document.getElementById('nickname-input') ? document.getElementById('nickname-input').value.trim() : '';
+  const params = new URLSearchParams();
+  if (code) params.set('s', code);
+  if (nick) params.set('n', nick);
   const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
   history.replaceState(null, '', newURL);
 }
 
 function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
-  params.forEach((member, unit) => {
-    selections[unit] = member;
-  });
+  if (params.has('s')) {
+    // 새 압축 포맷
+    decodeSelections(params.get('s'));
+  } else {
+    // 구 포맷 호환
+    params.forEach((member, unit) => {
+      if (unit !== 'n') selections[unit] = member;
+    });
+  }
+  if (params.has('n')) {
+    const nickInput = document.getElementById('nickname-input');
+    if (nickInput) nickInput.value = params.get('n');
+  }
 }
 
 function showToast(msg) {
