@@ -531,6 +531,27 @@ const DATA = {
         },
       ]
     },
+    {
+      name: "OTHERS",
+      color: "linear-gradient(135deg, #888, #aaa)",
+      logo: "",
+      units: [
+        {
+          id: "others", name: "기타",
+          logo: "",
+          members: [
+            { id: "jin", name: "사가미 진", img: "chibis/others/Jin_Sagami_Chibi.png" },
+            { id: "akiomi", name: "쿠누기 아키오미", img: "chibis/others/Akiomi_Kunugi_Chibi.png" },
+            { id: "nice", name: "나이스 아르넵 선더", img: "chibis/others/Nice_Arneb_Thunder_Chibi.png" },
+            { id: "kaname", name: "토죠 카나메", img: "chibis/others/Kaname_Tojo_Circle.png" },
+            { id: "gatekeeper", name: "게이트 키퍼", img: "chibis/others/Gatekeeper_Circle.png" },
+            { id: "seiya", name: "히다카 세이야", img: "chibis/others/Seiya_Hidaka_Circle.png" },
+            { id: "hitsugi", name: "쿠로네 히츠기", img: "chibis/others/Kurone_Hitsugi_Circle.png" },
+            { id: "anzu", name: "안즈", img: "chibis/others/Anzu_Circle.png" },
+          ]
+        },
+      ]
+    },
   ]
 };
 
@@ -563,6 +584,9 @@ const I18N = {
       natsume: '사카사키 나츠메', tsumugi: '아오바 츠무기', sora: '하루카와 소라',
       madara: '미케지마 마다라',
       esu: '에스', kanna: '칸나', raika: '라이카', yume: '유메',
+      jin: '사가미 진', akiomi: '쿠누기 아키오미', nice: '나이스 아르넵 선더',
+      kaname: '토죠 카나메', gatekeeper: '게이트 키퍼', seiya: '히다카 세이야',
+      hitsugi: '쿠로네 히츠기', anzu: '안즈',
     }
   },
   ja: {
@@ -593,6 +617,9 @@ const I18N = {
       natsume: '逆先夏目', tsumugi: '青葉つむぎ', sora: '春川宙',
       madara: '三毛縞斑',
       esu: 'エス', kanna: '神流', raika: '雷佳', yume: 'ゆめ',
+      jin: '佐賀美陣', akiomi: '椚章臣', nice: 'ナイスアルネブサンダー',
+      kaname: '東城つかさ', gatekeeper: '門番', seiya: '日高誠矢',
+      hitsugi: '黒音ひつぎ', anzu: 'あんず',
     }
   },
   en: {
@@ -623,6 +650,9 @@ const I18N = {
       natsume: 'Natsume Sakasaki', tsumugi: 'Tsumugi Aoba', sora: 'Sora Harukawa',
       madara: 'Madara Mikejima',
       esu: 'Esu', kanna: 'Kanna', raika: 'Raika', yume: 'Yume',
+      jin: 'Jin Sagami', akiomi: 'Akiomi Kunugi', nice: 'Nice Arneb Thunder',
+      kaname: 'Kaname Tojo', gatekeeper: 'Gatekeeper', seiya: 'Seiya Hidaka',
+      hitsugi: 'Hitsugi Kurone', anzu: 'Anzu',
     }
   }
 };
@@ -688,7 +718,7 @@ function render() {
     const header = document.createElement('div');
     header.className = 'agency-header';
     header.style.background = agency.color;
-    header.innerHTML = `<img src="${agency.logo}" alt="${agency.name}"><span>${agency.name}</span>`;
+    header.innerHTML = (agency.logo ? `<img src="${agency.logo}" alt="${agency.name}">` : '') + `<span>${agency.name === 'OTHERS' ? (currentLang === 'ja' ? 'その他' : currentLang === 'en' ? 'OTHERS' : '기타') : agency.name}</span>`;
     section.appendChild(header);
 
     const grid = document.createElement('div');
@@ -700,7 +730,7 @@ function render() {
       card.onclick = () => openModal(unit);
 
       const logoScale = (unit.id === 'valkyrie' || unit.id === 'alkaloid') ? 'height:35px;max-width:60%;' : (unit.id === 'undead' || unit.id === 'rabits') ? 'height:38px;max-width:65%;' : '';
-      let content = `<img class="unit-logo" src="${unit.logo}" alt="${unit.name}" style="${logoScale}">`;
+      let content = unit.logo ? `<img class="unit-logo" src="${unit.logo}" alt="${unit.name}" style="${logoScale}">` : '';
 
       if (selections[unit.id]) {
         const member = unit.members.find(m => m.id === selections[unit.id]);
@@ -721,8 +751,10 @@ function render() {
 
 function openModal(unit) {
   const modal = document.getElementById('modal');
-  document.getElementById('modal-logo').src = unit.logo;
-  document.getElementById('modal-unit-name').textContent = unit.name;
+  const modalLogo = document.getElementById('modal-logo');
+  if (unit.logo) { modalLogo.src = unit.logo; modalLogo.style.display = ''; }
+  else { modalLogo.style.display = 'none'; }
+  document.getElementById('modal-unit-name').textContent = unit.id === 'others' ? (currentLang === 'ja' ? 'その他' : currentLang === 'en' ? 'Others' : '기타') : unit.name;
 
   const charsEl = document.getElementById('modal-chars');
   charsEl.innerHTML = '';
