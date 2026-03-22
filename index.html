@@ -1007,11 +1007,15 @@ function getShareText() {
 
 function shareLink() {
   const { full } = getShareText();
-  navigator.clipboard.writeText(full).then(() => {
-    showToast(currentLang === 'ja' ? '📋 コピーしました' : currentLang === 'en' ? '📋 Copied!' : '📋 복사됨!');
-  }).catch(() => {
-    prompt('복사하세요:', full);
-  });
+  if (navigator.share) {
+    navigator.share({ text: full }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(full).then(() => {
+      showToast(currentLang === 'ja' ? '📋 コピーしました' : currentLang === 'en' ? '📋 Copied!' : '📋 복사됨!');
+    }).catch(() => {
+      prompt('복사하세요:', full);
+    });
+  }
 }
 
 function shareTextOnly(full) {
