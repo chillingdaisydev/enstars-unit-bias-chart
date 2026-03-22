@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앙스타 유닛별 최애캐 고르기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #e8ecf4;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 32px 0 8px;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .actions button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .actions button:active { transform: scale(0.95); }
+
+  .btn-save {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+  }
+
+  .btn-share {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: #fff;
+  }
+
+  .btn-reset {
+    background: #ccc;
+    color: #555;
+  }
+
+  #app {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+  }
+
+  .agency-section {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .agency-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 14px;
+  }
+
+  .agency-header img {
+    height: 40px;
+    object-fit: contain;
+    filter: brightness(1.1);
+  }
+
+  .agency-header span {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px;
+    padding: 1px;
+  }
+
+  .unit-card {
+    background: #f0f2f8;
+    border-radius: 8px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    min-height: 130px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .unit-card:hover {
+    background: #e0e4f0;
+    transform: translateY(-2px);
+  }
+
+  .unit-card.selected {
+    background: #f0f2f8;
+  }
+
+  .unit-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 50px;
+    max-width: 80%;
+    object-fit: contain;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .unit-card:not(.selected) .unit-logo {
+    opacity: 0.35;
+  }
+
+  .unit-chibi {
+    height: 90px;
+    object-fit: contain;
+    transition: transform 0.2s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .unit-chibi:hover {
+    transform: scale(1.1);
+  }
+
+  .unit-placeholder {
+    color: #999;
+    font-size: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .char-name {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  /* 팝업 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .modal-title img {
+    height: 32px;
+    object-fit: contain;
+  }
+
+  .modal-title span {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .modal-chars {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+
+  .modal-char {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    background: #f0f2f8;
+  }
+
+  .modal-char:hover {
+    background: #dde0f0;
+    transform: scale(1.05);
+  }
+
+  .modal-char img {
+    height: 72px;
+    object-fit: contain;
+    margin-bottom: 6px;
+  }
+
+  .modal-char span {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+  }
+
+  .modal-close {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px 32px;
+    border: none;
+    border-radius: 8px;
+    background: #e0e0e0;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* 결과 캡처용 */
+  #capture-area {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #444;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 200;
+    transition: transform 0.3s;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 600px) {
+    .units-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .modal-chars {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="capture-area">
+  <h1>앙스타 유닛별 최애캐</h1>
+  <p class="subtitle">각 유닛을 클릭해서 최애캐를 골라보세요!</p>
+  <div id="app"></div>
+</div>
+
+<div class="actions">
+  <button class="btn-save" onclick="saveAsImage()">이미지 저장</button>
+  <button class="btn-share" onclick="shareLink()">링크 공유</button>
+  <button class="btn-reset" onclick="resetAll()">초기화</button>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <img id="modal-logo" src="" alt="">
+      <span id="modal-unit-name"></span>
+    </div>
+    <div class="modal-chars" id="modal-chars"></div>
+    <button class="modal-close" onclick="closeModal()">닫기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const DATA = {
+  agencies: [
+    {
+      name: "STARMAKER PRODUCTION",
+      color: "linear-gradient(135deg, #f0c420, #f09020)",
+      logo: "chibis/agencies/Starmaker_Production_Logo.png",
+      units: [
+        {
+          id: "fine", name: "fine",
+          logo: "chibis/fine/Fine_ES_Logo.png",
+          members: [
+            { id: "eichi", name: "텐쇼인 에이치", img: "chibis/fine/Eichi_Tenshouin_Work_Unit_Outfit_Chibi.png" },
+            { id: "wataru", name: "히비키 와타루", img: "chibis/fine/Wataru_Hibiki_Work_Unit_Outfit_Chibi.png" },
+            { id: "tori", name: "히메미야 토리", img: "chibis/fine/Tori_Himemiya_Work_Unit_Outfit_Chibi.png" },
+            { id: "yuzuru", name: "후시미 유즈루", img: "chibis/fine/Yuzuru_Fushimi_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "trickstar", name: "Trickstar",
+          logo: "chibis/Trickstar/Trickstar_ES_Logo.png",
+          members: [
+            { id: "subaru", name: "아케호시 스바루", img: "chibis/Trickstar/Subaru_Akehoshi_Work_Unit_Outfit_Chibi.png" },
+            { id: "hokuto", name: "히다카 호쿠토", img: "chibis/Trickstar/Hokuto_Hidaka_Work_Unit_Outfit_Chibi.png" },
+            { id: "makoto", name: "유우키 마코토", img: "chibis/Trickstar/Makoto_Yuuki_Work_Unit_Outfit_Chibi.png" },
+            { id: "mao", name: "이사라 마오", img: "chibis/Trickstar/Mao_Isara_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "ryuseitai", name: "RYUSEITAI",
+          logo: "chibis/RYUSEITAI/RYUSEITAI_ES_Logo.png",
+          members: [
+            { id: "chiaki", name: "모리사와 치아키", img: "chibis/RYUSEITAI/Chiaki_Morisawa_Work_Unit_Outfit_Chibi.png" },
+            { id: "kanata", name: "신카이 카나타", img: "chibis/RYUSEITAI/Kanata_Shinkai_Work_Unit_Outfit_Chibi.png" },
+            { id: "tetora", name: "나구모 테토라", img: "chibis/RYUSEITAI/Tetora_Nagumo_Work_Unit_Outfit_Chibi.png" },
+            { id: "midori", name: "타카미네 미도리", img: "chibis/RYUSEITAI/Midori_Takamine_Work_Unit_Outfit_Chibi.png" },
+            { id: "shinobu", name: "센고쿠 시노부", img: "chibis/RYUSEITAI/Shinobu_Sengoku_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "alkaloid", name: "ALKALOID",
+          logo: "chibis/ALKALOID/ALKALOID_ES_Logo.png",
+          members: [
+            { id: "hiiro", name: "아마기 히이로", img: "chibis/ALKALOID/Hiiro_Amagi_Work_Unit_Outfit_Chibi.png" },
+            { id: "aira", name: "시라토리 아이라", img: "chibis/ALKALOID/Aira_Shiratori_Work_Unit_Outfit_Chibi.png" },
+            { id: "mayoi", name: "아야세 마요이", img: "chibis/ALKALOID/Mayoi_Ayase_Work_Unit_Outfit_Chibi.png" },
+            { id: "tatsumi", name: "카제하야 타츠미", img: "chibis/ALKALOID/Tatsumi_Kazehaya_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+      ]
+    },
+    {
+      name: "COSMIC PRODUCTION",
+      color: "linear-gradient(135deg, #7b2ff7, #2196f3)",
+      logo: "chibis/agencies/Cosmic_Production_Logo.png",
+      units: [
+        {
+          id: "eden", name: "Eden",
+          logo: "chibis/Eden/Eden_ES_Logo.png",
+          members: [
+            { id: "nagisa", name: "란 나기사", img: "chibis/Eden/Nagisa_Ran_Work_Unit_Outfit_Chibi.png" },
+            { id: "hiyori", name: "토모에 히요리", img: "chibis/Eden/Hiyori_Tomoe_Work_Unit_Outfit_Chibi.png" },
+            { id: "ibara", name: "사에구사 이바라", img: "chibis/Eden/Ibara_Saegusa_Work_Unit_Outfit_Chibi.png" },
+            { id: "jun", name: "사자나미 쥰", img: "chibis/Eden/Jun_Sazanami_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "valkyrie", name: "Valkyrie",
+          logo: "chibis/Valkyrie/Valkyrie_ES_Logo.png",
+          members: [
+            { id: "shu", name: "이츠키 슈", img: "chibis/Valkyrie/Shu_Itsuki_Work_Unit_Outfit_Chibi.png" },
+            { id: "mika", name: "카게히라 미카", img: "chibis/Valkyrie/Mika_Kagehira_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "2wink", name: "2wink",
+          logo: "chibis/2wink/2wink_ES_Logo.png",
+          members: [
+            { id: "hinata", name: "아오이 히나타", img: "chibis/2wink/Hinata_Aoi_Work_Unit_Outfit_Chibi.png" },
+            { id: "yuta", name: "아오이 유타", img: "chibis/2wink/Yuta_Aoi_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "crazyb", name: "Crazy:B",
+          logo: "chibis/CrazyB/CrazyB_ES_Logo.png",
+          members: [
+            { id: "rinne", name: "아마기 린네", img: "chibis/CrazyB/Rinne_Amagi_Work_Unit_Outfit_Chibi.png" },
+            { id: "himeru", name: "HiMERU", img: "chibis/CrazyB/HiMERU_Work_Unit_Outfit_Chibi.png" },
+            { id: "kohaku", name: "오우카와 코하쿠", img: "chibis/CrazyB/Kohaku_Oukawa_Work_Unit_Outfit_Chibi.png" },
+            { id: "niki", name: "시이나 니키", img: "chibis/CrazyB/Niki_Shiina_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+      ]
+    },
+    {
+      name: "Rhythm Link",
+      color: "linear-gradient(135deg, #f5576c, #ff7eb3)",
+      logo: "chibis/agencies/Rhythm_Link_Logo.png",
+      units: [
+        {
+          id: "undead", name: "UNDEAD",
+          logo: "chibis/UNDEAD/UNDEAD_ES_Logo.png",
+          members: [
+            { id: "rei", name: "사쿠마 레이", img: "chibis/UNDEAD/Rei_Sakuma_Work_Unit_Outfit_Chibi.png" },
+            { id: "kaoru", name: "하카제 카오루", img: "chibis/UNDEAD/Kaoru_Hakaze_Work_Unit_Outfit_Chibi.png" },
+            { id: "koga", name: "오가미 코가", img: "chibis/UNDEAD/Koga_Ogami_Work_Unit_Outfit_Chibi.png" },
+            { id: "adonis", name: "오토가리 아도니스", img: "chibis/UNDEAD/Adonis_Otogari_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "rabits", name: "Ra*bits",
+          logo: "chibis/Rabits/Rabits_ES_Logo.png",
+          members: [
+            { id: "nazuna", name: "니토 나즈나", img: "chibis/Rabits/Nazuna_Nito_Work_Unit_Outfit_Chibi.png" },
+            { id: "mitsuru", name: "텐마 미츠루", img: "chibis/Rabits/Mitsuru_Tenma_Work_Unit_Outfit_Chibi.png" },
+            { id: "hajime", name: "시노 하지메", img: "chibis/Rabits/Hajime_Shino_Work_Unit_Outfit_Chibi.png" },
+            { id: "tomoya", name: "마시로 토모야", img: "chibis/Rabits/Tomoya_Mashiro_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "akatsuki", name: "AKATSUKI",
+          logo: "chibis/AKATSUKI/AKATSUKI_ES_Logo.png",
+          members: [
+            { id: "keito", name: "하스미 케이토", img: "chibis/AKATSUKI/Keito_Hasumi_Work_Unit_Outfit_Chibi.png" },
+            { id: "kuro", name: "키류 쿠로", img: "chibis/AKATSUKI/Kuro_Kiryu_Work_Unit_Outfit_Chibi.png" },
+            { id: "souma", name: "칸자키 소우마", img: "chibis/AKATSUKI/Souma_Kanzaki_Work_Unit_Outfit_Chibi.png" },
+            { id: "ibuki", name: "타키 이부키", img: "chibis/AKATSUKI/Ibuki_Taki_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "melodious", name: "Mellow Dear Us",
+          logo: "chibis/Melodious/MELLOW_DEAR_US_ES_Logo.png",
+          members: [
+            { id: "chitose", name: "츠즈라 치토세", img: "chibis/Melodious/Chitose_Tsuzura_Work_Unit_Outfit_Chibi.png" },
+            { id: "juis", name: "코지카 쥬이스", img: "chibis/Melodious/Juis_Kojika_Work_Unit_Outfit_Chibi.png" },
+            { id: "mashu", name: "쿠온 마슈", img: "chibis/Melodious/Mashu_Kuon_Work_Unit_Outfit_Chibi.png" },
+            { id: "nozomi", name: "마도카 노조미", img: "chibis/Melodious/Nozomi_Madoka_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+      ]
+    },
+    {
+      name: "NEW DIMENSION",
+      color: "linear-gradient(135deg, #8b0000, #cc0000)",
+      logo: "chibis/agencies/NEW_DIMENSION_Logo.png",
+      units: [
+        {
+          id: "knights", name: "Knights",
+          logo: "chibis/Knights/Knights_ES_Logo.png",
+          members: [
+            { id: "leo", name: "츠키나가 레오", img: "chibis/Knights/Leo_Tsukinaga_Work_Unit_Outfit_Chibi.png" },
+            { id: "izumi", name: "세나 이즈미", img: "chibis/Knights/Izumi_Sena_Work_Unit_Outfit_Chibi.png" },
+            { id: "arashi", name: "나루카미 아라시", img: "chibis/Knights/Arashi_Narukami_Work_Unit_Outfit_Chibi.png" },
+            { id: "ritsu", name: "사쿠마 리츠", img: "chibis/Knights/Ritsu_Sakuma_Work_Unit_Outfit_Chibi.png" },
+            { id: "tsukasa", name: "스오우 츠카사", img: "chibis/Knights/Tsukasa_Suou_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "switch", name: "Switch",
+          logo: "chibis/Switch/Switch_ES_Logo.png",
+          members: [
+            { id: "natsume", name: "사카사키 나츠메", img: "chibis/Switch/Natsume_Sakasaki_Work_Unit_Outfit_Chibi.png" },
+            { id: "tsumugi", name: "아오바 츠무기", img: "chibis/Switch/Tsumugi_Aoba_Work_Unit_Outfit_Chibi.png" },
+            { id: "sora", name: "하루카와 소라", img: "chibis/Switch/Sora_Harukawa_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "mam", name: "MaM",
+          logo: "chibis/MaM/MaM_ES_Logo.png",
+          members: [
+            { id: "madara", name: "미케지마 마다라", img: "chibis/MaM/Madara_Mikejima_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+        {
+          id: "esprit", name: "ESPRIT",
+          logo: "chibis/ESPRIT/Special_for_Princess_ES_Logo.png",
+          members: [
+            { id: "esu", name: "에스", img: "chibis/ESPRIT/Esu_Work_Unit_Outfit_Chibi.png" },
+            { id: "kanna", name: "칸나", img: "chibis/ESPRIT/Kanna_Work_Unit_Outfit_Chibi.png" },
+            { id: "raika", name: "라이카", img: "chibis/ESPRIT/Raika_Work_Unit_Outfit_Chibi.png" },
+            { id: "yume", name: "유메", img: "chibis/ESPRIT/Yume_Work_Unit_Outfit_Chibi.png" },
+          ]
+        },
+      ]
+    },
+  ]
+};
+
+let selections = {};
+
+function init() {
+  loadFromURL();
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  DATA.agencies.forEach(agency => {
+    const section = document.createElement('div');
+    section.className = 'agency-section';
+
+    const header = document.createElement('div');
+    header.className = 'agency-header';
+    header.style.background = agency.color;
+    header.innerHTML = `<img src="${agency.logo}" alt="${agency.name}"><span>${agency.name}</span>`;
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'units-grid';
+
+    agency.units.forEach(unit => {
+      const card = document.createElement('div');
+      card.className = 'unit-card' + (selections[unit.id] ? ' selected' : '');
+      card.onclick = () => openModal(unit);
+
+      let content = `<img class="unit-logo" src="${unit.logo}" alt="${unit.name}">`;
+
+      if (selections[unit.id]) {
+        const member = unit.members.find(m => m.id === selections[unit.id]);
+        if (member) {
+          content += `<img class="unit-chibi" src="${member.img}" alt="${member.name}">`;
+          content += `<div class="char-name">${member.name}</div>`;
+        }
+      }
+
+      card.innerHTML = content;
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    app.appendChild(section);
+  });
+}
+
+function openModal(unit) {
+  const modal = document.getElementById('modal');
+  document.getElementById('modal-logo').src = unit.logo;
+  document.getElementById('modal-unit-name').textContent = unit.name;
+
+  const charsEl = document.getElementById('modal-chars');
+  charsEl.innerHTML = '';
+
+  // 선택 안함 옵션
+  const noneEl = document.createElement('div');
+  noneEl.className = 'modal-char';
+  noneEl.style.background = '#3a2a2a';
+  noneEl.innerHTML = `<div style="height:72px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#888;">-</div><span style="color:#f88;">선택 안함</span>`;
+  noneEl.onclick = () => {
+    delete selections[unit.id];
+    updateURL();
+    render();
+    modal.classList.remove('active');
+  };
+  charsEl.appendChild(noneEl);
+
+  unit.members.forEach(member => {
+    const el = document.createElement('div');
+    el.className = 'modal-char';
+    el.innerHTML = `<img src="${member.img}" alt="${member.name}"><span>${member.name}</span>`;
+    el.onclick = () => {
+      selections[unit.id] = member.id;
+      updateURL();
+      render();
+      modal.classList.remove('active');
+    };
+    charsEl.appendChild(el);
+  });
+
+  modal.classList.add('active');
+}
+
+function closeModal(e) {
+  if (!e || e.target === e.currentTarget) {
+    document.getElementById('modal').classList.remove('active');
+  }
+}
+
+function updateURL() {
+  const params = new URLSearchParams();
+  Object.entries(selections).forEach(([unit, member]) => {
+    params.set(unit, member);
+  });
+  const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  history.replaceState(null, '', newURL);
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  params.forEach((member, unit) => {
+    selections[unit] = member;
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function saveAsImage() {
+  // 캡처 전용 영역을 고정 너비로 생성
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:400px;box-sizing:border-box;background:#e8ecf4;padding:10px 2px 14px;font-family:"Noto Sans KR",sans-serif;overflow:hidden;';
+
+  const title = document.createElement('h1');
+  title.textContent = '앙스타 유닛별 최애캐';
+  title.style.cssText = 'text-align:center;font-size:18px;font-weight:900;color:#222;margin:0 0 8px;letter-spacing:2px;';
+  container.appendChild(title);
+
+  DATA.agencies.forEach(agency => {
+    const section = document.createElement('div');
+    section.style.cssText = 'margin-bottom:4px;border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);';
+
+    const header = document.createElement('div');
+    header.style.cssText = `display:flex;align-items:center;padding:4px 10px;gap:8px;background:${agency.color};`;
+    header.innerHTML = `<img src="${agency.logo}" style="height:20px;object-fit:contain;"><span style="font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#fff;">${agency.name}</span>`;
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:0;';
+
+    agency.units.forEach(unit => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#f0f2f8;padding:2px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;position:relative;overflow:hidden;';
+
+      const logo = document.createElement('img');
+      logo.src = unit.logo;
+      const hasSel = !!selections[unit.id];
+      logo.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:30px;max-width:80%;object-fit:contain;opacity:${hasSel ? '0.12' : '0.3'};pointer-events:none;`;
+      card.appendChild(logo);
+
+      if (hasSel) {
+        const member = unit.members.find(m => m.id === selections[unit.id]);
+        if (member) {
+          const chibi = document.createElement('img');
+          chibi.src = member.img;
+          chibi.style.cssText = 'height:62px;object-fit:contain;position:relative;z-index:1;';
+          card.appendChild(chibi);
+          const name = document.createElement('div');
+          name.textContent = member.name;
+          name.style.cssText = 'font-size:8px;color:#666;margin-top:1px;position:relative;z-index:1;text-align:center;';
+          card.appendChild(name);
+        }
+      }
+
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+
+  document.body.appendChild(container);
+
+  const actualW = container.offsetWidth;
+  const actualH = container.offsetHeight;
+  html2canvas(container, {
+    backgroundColor: '#e8ecf4',
+    scale: 2,
+    useCORS: true,
+    width: actualW,
+    height: actualH,
+    windowWidth: actualW,
+  }).then(canvas => {
+    document.body.removeChild(container);
+    const link = document.createElement('a');
+    link.download = 'enstar_favorites.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('이미지가 저장되었습니다!');
+  }).catch(() => {
+    document.body.removeChild(container);
+  });
+}
+
+function shareLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('링크가 복사되었습니다!');
+  }).catch(() => {
+    prompt('링크를 복사하세요:', url);
+  });
+}
+
+function resetAll() {
+  selections = {};
+  updateURL();
+  render();
+  showToast('초기화되었습니다');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+init();
+</script>
+</body>
+</html>
