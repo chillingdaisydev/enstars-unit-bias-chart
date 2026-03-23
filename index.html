@@ -1070,8 +1070,9 @@ function saveAsImage() {
         selectionCode: encodeSelections(),
         selections: getSelectionSnapshot(),
       });
-      // 모바일: Web Share API 시도
-      if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+      // 모바일/태블릿: Web Share API 시도 (iPad는 MacIntel + touch로 감지)
+      const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (navigator.share && isMobile) {
         const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
         navigator.share({ files: [file] }).then(() => {
           showToast(t('toastSaved'));
@@ -1099,13 +1100,26 @@ function saveAsImage() {
 
 function fallbackDownload(blob) {
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.download = 'enstar_favorites.png';
-  link.href = url;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  // Safari/iPad: a.download 안 먹으면 새 탭에서 이미지 열기
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isSafari) {
+    const win = window.open();
+    if (win) {
+      win.document.write(`<img src="${url}" style="max-width:100%"><p style="text-align:center;font-family:sans-serif;color:#888;">${currentLang === 'ja' ? '長押しで保存' : currentLang === 'en' ? 'Long press or right-click to save' : '꾹 눌러서 저장하세요'}</p>`);
+      win.document.title = 'Enstars Bias Chart';
+    } else {
+      // 팝업 차단 시 직접 이동
+      window.location.href = url;
+    }
+  } else {
+    const link = document.createElement('a');
+    link.download = 'enstar_favorites.png';
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
   showToast(t('toastSaved'));
 }
 
