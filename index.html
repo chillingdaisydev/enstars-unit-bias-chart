@@ -1070,18 +1070,21 @@ function saveAsImage() {
         selectionCode: encodeSelections(),
         selections: getSelectionSnapshot(),
       });
-      // 모바일/태블릿: Web Share API 시도 (iPad는 MacIntel + touch로 감지)
+      // 모바일/태블릿: Web Share API 시도
       const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (navigator.share && isMobile) {
-        const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
+      const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
+      const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+      if (isMobile && canShareFiles) {
         navigator.share({ files: [file] }).then(() => {
           showToast(t('toastSaved'));
         }).catch(err => {
-          gtag('event', 'share_error', {
-            error_message: err?.message || 'share failed',
-            user_agent: navigator.userAgent
-          });
-          fallbackDownload(blob);
+          if (err.name !== 'AbortError') {
+            gtag('event', 'share_error', {
+              error_message: err?.message || 'share failed',
+              user_agent: navigator.userAgent
+            });
+          }
+          // 사용자가 취소한 경우는 무시, 진짜 에러만 fallback
         });
       } else {
         fallbackDownload(blob);
@@ -1100,8 +1103,9 @@ function saveAsImage() {
 
 function fallbackDownload(blob) {
   const url = URL.createObjectURL(blob);
-  // Safari/iPad: a.download 안 먹으면 새 탭에서 이미지 열기
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // iPad/Mac Safari만 새 탭 (iPhone은 a.download 됨)
+  const isIPadOrMacSafari = (navigator.platform === 'MacIntel') && !(/iPhone/i.test(navigator.userAgent));
+  const isSafari = isIPadOrMacSafari && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isSafari) {
     const win = window.open();
     if (win) {
