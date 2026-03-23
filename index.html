@@ -1072,20 +1072,19 @@ function saveAsImage() {
       });
       // 모바일/태블릿: Web Share API 시도
       const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
-      const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
-      if (isMobile && canShareFiles) {
-        navigator.share({ files: [file] }).then(() => {
-          showToast(t('toastSaved'));
-        }).catch(err => {
-          if (err.name !== 'AbortError') {
-            gtag('event', 'share_error', {
-              error_message: err?.message || 'share failed',
-              user_agent: navigator.userAgent
-            });
-          }
-          // 사용자가 취소한 경우는 무시, 진짜 에러만 fallback
-        });
+      if (isMobile && navigator.share) {
+        const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
+        const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+        if (canShareFiles) {
+          navigator.share({ files: [file] }).catch(err => {
+            if (err.name !== 'AbortError') {
+              gtag('event', 'share_error', { error_message: err?.message, user_agent: navigator.userAgent });
+              fallbackDownload(blob);
+            }
+          });
+        } else {
+          fallbackDownload(blob);
+        }
       } else {
         fallbackDownload(blob);
       }
@@ -1102,29 +1101,30 @@ function saveAsImage() {
 }
 
 function fallbackDownload(blob) {
-  const url = URL.createObjectURL(blob);
-  // iPad/Mac Safari만 새 탭 (iPhone은 a.download 됨)
-  const isIPadOrMacSafari = (navigator.platform === 'MacIntel') && !(/iPhone/i.test(navigator.userAgent));
-  const isSafari = isIPadOrMacSafari && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isSafari) {
-    const win = window.open();
-    if (win) {
-      win.document.write(`<img src="${url}" style="max-width:100%"><p style="text-align:center;font-family:sans-serif;color:#888;">${currentLang === 'ja' ? '長押しで保存' : currentLang === 'en' ? 'Long press or right-click to save' : '꾹 눌러서 저장하세요'}</p>`);
-      win.document.title = 'Enstars Bias Chart';
+  // blob → data URL (Safari에서 blob URL 다운로드 안 되는 문제 우회)
+  const reader = new FileReader();
+  reader.onload = function() {
+    const dataUrl = reader.result;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isSafari) {
+      // Safari: 새 탭에 이미지 띄우기 (꾹 눌러 저장)
+      const win = window.open();
+      if (win) {
+        win.document.write(`<!DOCTYPE html><html><head><title>Enstars Bias Chart</title><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f5;"><img src="${dataUrl}" style="max-width:95%;box-shadow:0 2px 10px rgba(0,0,0,0.1);border-radius:8px;"><p style="text-align:center;font-family:sans-serif;color:#888;margin-top:16px;">${currentLang === 'ja' ? '長押しで保存' : currentLang === 'en' ? 'Long press or right-click to save' : '꾹 눌러서 저장하세요'}</p></body></html>`);
+      } else {
+        window.location.href = dataUrl;
+      }
     } else {
-      // 팝업 차단 시 직접 이동
-      window.location.href = url;
+      const link = document.createElement('a');
+      link.download = 'enstar_favorites.png';
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  } else {
-    const link = document.createElement('a');
-    link.download = 'enstar_favorites.png';
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  showToast(t('toastSaved'));
+    showToast(t('toastSaved'));
+  };
+  reader.readAsDataURL(blob);
 }
 
 function getShareText() {
