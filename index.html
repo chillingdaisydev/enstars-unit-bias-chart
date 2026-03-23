@@ -24,7 +24,7 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="⭐ 앙스타 유닛별 최애캐 고르기">
+<meta property="og:title" content="앙스타 유닛별 최애캐 고르기">
 <meta property="og:description" content="앙상블 스타즈 유닛별로 최애 캐릭터를 골라보세요! Pick your favorite Ensemble Stars character per unit!">
 <meta property="og:url" content="https://chillingdaisydev.github.io/enstars-unit-bias-chart/">
 <meta property="og:image" content="https://chillingdaisydev.github.io/enstars-unit-bias-chart/og-image.png">
@@ -33,7 +33,7 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="⭐ 앙스타 유닛별 최애캐 고르기">
+<meta name="twitter:title" content="앙스타 유닛별 최애캐 고르기">
 <meta name="twitter:description" content="앙상블 스타즈 유닛별로 최애 캐릭터를 골라보세요!">
 <meta name="twitter:image" content="https://chillingdaisydev.github.io/enstars-unit-bias-chart/og-image.png">
 <style>
@@ -345,7 +345,7 @@
     <option value="ko">🇰🇷 한국어</option>
     <option value="ja">🇯🇵 日本語</option>
     <option value="en">🇺🇸 English</option>
-    <option value="zh">🇹🇼 繁體中文</option>
+    <option value="zh-TW">🇹🇼 繁體中文</option>
     <option value="id">🇮🇩 Indonesia</option>
   </select>
 </div>
@@ -355,7 +355,7 @@
 </div>
 
 <div id="capture-area">
-  <h1 id="main-title">⭐ 앙스타 유닛별 최애캐 ⭐</h1>
+  <h1 id="main-title">앙스타 유닛별 최애캐</h1>
   <p class="subtitle" id="subtitle">각 유닛을 클릭해서 최애캐를 골라보세요!</p>
   <div id="app"></div>
 </div>
@@ -595,7 +595,7 @@ const DATA = {
 
 const I18N = {
   ko: {
-    title: '⭐ 앙스타 유닛별 최애캐 ⭐',
+    title: '앙스타 유닛별 최애캐',
     subtitle: '각 유닛을 클릭해서 최애캐를 골라보세요!',
     save: '이미지 저장', share: '링크 공유', reset: '초기화',
     close: '닫기', noSelect: '선택 안함',
@@ -603,8 +603,8 @@ const I18N = {
     toastLink: '링크가 복사되었습니다!',
     toastReset: '초기화되었습니다',
     nickPlaceholder: '닉네임 입력',
-    titleWithName: (name) => `${name}의<br><span style="white-space:nowrap">⭐ 앙스타</span> <span style="white-space:nowrap">유닛별 최애캐 ⭐</span>`,
-    titleNoName: '<span style="white-space:nowrap">⭐ 앙스타</span> <span style="white-space:nowrap">유닛별 최애캐 ⭐</span>',
+    titleWithName: (name) => `${name}의<br>앙스타 유닛별 최애캐`,
+    titleNoName: '앙스타 유닛별 최애캐',
     names: {
       eichi: '텐쇼인 에이치', wataru: '히비키 와타루', tori: '히메미야 토리', yuzuru: '후시미 유즈루',
       subaru: '아케호시 스바루', hokuto: '히다카 호쿠토', makoto: '유우키 마코토', mao: '이사라 마오',
@@ -628,7 +628,7 @@ const I18N = {
     }
   },
   ja: {
-    title: '⭐ あんスタ ユニット別推し ⭐',
+    title: 'あんスタ ユニット別推し',
     subtitle: 'ユニットをクリックして推しを選んでね！',
     save: '画像保存', share: 'リンク共有', reset: 'リセット',
     close: '閉じる', noSelect: '選択しない',
@@ -636,8 +636,8 @@ const I18N = {
     toastLink: 'リンクをコピーしました！',
     toastReset: 'リセットしました',
     nickPlaceholder: 'ニックネーム入力',
-    titleWithName: (name) => `${name}の<br><span style="white-space:nowrap">⭐ あんスタ</span> <span style="white-space:nowrap">ユニット別推し ⭐</span>`,
-    titleNoName: '<span style="white-space:nowrap">⭐ あんスタ</span> <span style="white-space:nowrap">ユニット別推し ⭐</span>',
+    titleWithName: (name) => `${name}の<br>あんスタ ユニット別推し`,
+    titleNoName: 'あんスタ ユニット別推し',
     names: {
       eichi: '天祥院英智', wataru: '日々樹渉', tori: '姫宮桃李', yuzuru: '伏見弓弦',
       subaru: '明星スバル', hokuto: '氷鷹北斗', makoto: '遊木真', mao: '衣更真緒',
@@ -661,7 +661,7 @@ const I18N = {
     }
   },
   en: {
-    title: '⭐ Enstars Unit Bias Chart ⭐',
+    title: 'Enstars Unit Bias Chart',
     subtitle: 'Click a unit to pick your favorite!',
     save: 'Save Image', share: 'Share Link', reset: 'Reset',
     close: 'Close', noSelect: 'No Selection',
@@ -669,8 +669,8 @@ const I18N = {
     toastLink: 'Link copied!',
     toastReset: 'Reset complete',
     nickPlaceholder: 'Enter nickname',
-    titleWithName: (name) => `${name}'s<br><span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias ⭐</span>`,
-    titleNoName: '<span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias Chart ⭐</span>',
+    titleWithName: (name) => `${name}'s<br>Enstars Unit Bias`,
+    titleNoName: 'Enstars Unit Bias Chart',
     names: {
       eichi: 'Eichi Tenshouin', wataru: 'Wataru Hibiki', tori: 'Tori Himemiya', yuzuru: 'Yuzuru Fushimi',
       subaru: 'Subaru Akehoshi', hokuto: 'Hokuto Hidaka', makoto: 'Makoto Yuuki', mao: 'Mao Isara',
@@ -694,7 +694,7 @@ const I18N = {
     }
   },
   'zh-TW': {
-    title: '⭐ 偶像夢幻祭 團隊推 ⭐',
+    title: '偶像夢幻祭 團隊推',
     subtitle: '點擊團隊選擇你的最推！',
     save: '儲存圖片', share: '分享連結', reset: '重置',
     close: '關閉', noSelect: '不選擇',
@@ -702,8 +702,8 @@ const I18N = {
     toastLink: '連結已複製！',
     toastReset: '已重置',
     nickPlaceholder: '輸入暱稱',
-    titleWithName: (name) => `${name}的<br><span style="white-space:nowrap">⭐ 偶像夢幻祭</span> <span style="white-space:nowrap">團隊推 ⭐</span>`,
-    titleNoName: '<span style="white-space:nowrap">⭐ 偶像夢幻祭</span> <span style="white-space:nowrap">團隊推 ⭐</span>',
+    titleWithName: (name) => `${name}的<br>偶像夢幻祭 團隊推`,
+    titleNoName: '偶像夢幻祭 團隊推',
     names: {
       eichi: '天祥院英智', wataru: '日日樹涉', tori: '姬宮桃李', yuzuru: '伏見弓弦',
       subaru: '明星昴流', hokuto: '冰鷹北斗', makoto: '遊木真', mao: '衣更真緒',
@@ -727,7 +727,7 @@ const I18N = {
     }
   },
   id: {
-    title: '⭐ Enstars Unit Bias Chart ⭐',
+    title: 'Enstars Unit Bias Chart',
     subtitle: 'Klik unit untuk memilih karakter favoritmu!',
     save: 'Simpan Gambar', share: 'Bagikan Link', reset: 'Reset',
     close: 'Tutup', noSelect: 'Tidak Memilih',
@@ -735,8 +735,8 @@ const I18N = {
     toastLink: 'Link tersalin!',
     toastReset: 'Sudah direset',
     nickPlaceholder: 'Masukkan nickname',
-    titleWithName: (name) => `${name}'s<br><span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias ⭐</span>`,
-    titleNoName: '<span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias Chart ⭐</span>',
+    titleWithName: (name) => `${name}'s<br>Enstars Unit Bias`,
+    titleNoName: 'Enstars Unit Bias Chart',
     names: {
       eichi: 'Eichi Tenshouin', wataru: 'Wataru Hibiki', tori: 'Tori Himemiya', yuzuru: 'Yuzuru Fushimi',
       subaru: 'Subaru Akehoshi', hokuto: 'Hokuto Hidaka', makoto: 'Makoto Yuuki', mao: 'Mao Isara',
