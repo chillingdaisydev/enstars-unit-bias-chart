@@ -314,13 +314,6 @@ function buildDashboardHtml(summary) {
     return items.map((item) => `<tr><td>${item.label || item.key}</td><td>${item.count}</td></tr>`).join('');
   };
 
-  const renderLeaderRows = (items, emptyLabel) => {
-    if (!items.length) {
-      return `<tr><td colspan="3">${emptyLabel}</td></tr>`;
-    }
-    return items.map((item) => `<tr><td>${item.unitLabel}</td><td>${item.characterLabel}</td><td>${item.count}</td></tr>`).join('');
-  };
-
   const renderUnitRankings = (rankings) => {
     if (!rankings.length) return '<p class="empty-state">No data yet</p>';
     return rankings.map((unit) => {
@@ -443,10 +436,6 @@ function buildDashboardHtml(summary) {
     <div class="card span-2">
       <div>Daily Visits</div>
       ${renderVisitBars(summary.recentVisits)}
-    </div>
-    <div class="card">
-      <div>Unit Winners by Save</div>
-      <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.savedUnitLeaders, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
       <div>Top 5 Saved Units</div>
