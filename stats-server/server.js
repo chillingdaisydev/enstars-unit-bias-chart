@@ -192,6 +192,32 @@ function safeObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 }
 
+function incrementNestedCounter(map, groupKey, itemKey, amount = 1) {
+  if (!groupKey || !itemKey) {
+    return;
+  }
+  if (!map[groupKey]) {
+    map[groupKey] = {};
+  }
+  map[groupKey][itemKey] = (map[groupKey][itemKey] || 0) + amount;
+}
+
+function buildUnitLeaders(counterMap) {
+  return Object.keys(UNIT_LABELS)
+    .map((unitId) => {
+      const entries = sortedEntries(counterMap[unitId] || {}, 1);
+      const top = entries[0];
+      return {
+        unitId,
+        unitLabel: UNIT_LABELS[unitId] || unitId,
+        characterId: top ? top.key : '',
+        characterLabel: top ? (CHARACTER_LABELS[top.key] || top.key) : '데이터 없음',
+        count: top ? top.count : 0,
+      };
+    })
+    .filter((item) => item.count > 0);
+}
+
 function summarizeEvents() {
   const summary = {
     totalEvents: 0,
@@ -202,6 +228,8 @@ function summarizeEvents() {
     savedCharacters: {},
     selectedUnits: {},
     savedUnits: {},
+    selectedCharactersByUnit: {},
+    savedCharactersByUnit: {},
   };
   const sessions = new Set();
 
@@ -225,6 +253,7 @@ function summarizeEvents() {
       if (event.eventType === 'select_character') {
         incrementCounter(summary.selectedUnits, event.unitId);
         incrementCounter(summary.selectedCharacters, event.characterId);
+        incrementNestedCounter(summary.selectedCharactersByUnit, event.unitId, event.characterId);
       }
 
       if (event.eventType === 'save_image') {
@@ -232,6 +261,7 @@ function summarizeEvents() {
         for (const [unitId, characterId] of Object.entries(selections)) {
           incrementCounter(summary.savedUnits, unitId);
           incrementCounter(summary.savedCharacters, characterId);
+          incrementNestedCounter(summary.savedCharactersByUnit, unitId, characterId);
         }
       }
     } catch {
@@ -244,6 +274,8 @@ function summarizeEvents() {
   summary.topSavedCharacters = labelEntries(sortedEntries(summary.savedCharacters, 5), CHARACTER_LABELS);
   summary.topSelectedUnits = labelEntries(sortedEntries(summary.selectedUnits, 5), UNIT_LABELS);
   summary.topSavedUnits = labelEntries(sortedEntries(summary.savedUnits, 5), UNIT_LABELS);
+  summary.selectedUnitLeaders = buildUnitLeaders(summary.selectedCharactersByUnit);
+  summary.savedUnitLeaders = buildUnitLeaders(summary.savedCharactersByUnit);
   summary.recentDays = sortedEntries(summary.dailyEvents, 14);
 
   return summary;
@@ -255,6 +287,13 @@ function buildDashboardHtml(summary) {
       return `<tr><td colspan="2">${emptyLabel}</td></tr>`;
     }
     return items.map((item) => `<tr><td>${item.label || item.key}</td><td>${item.count}</td></tr>`).join('');
+  };
+
+  const renderLeaderRows = (items, emptyLabel) => {
+    if (!items.length) {
+      return `<tr><td colspan="3">${emptyLabel}</td></tr>`;
+    }
+    return items.map((item) => `<tr><td>${item.unitLabel}</td><td>${item.characterLabel}</td><td>${item.count}</td></tr>`).join('');
   };
 
   return `<!DOCTYPE html>
@@ -314,13 +353,14 @@ function buildDashboardHtml(summary) {
     <div class="card"><div>Unique Sessions</div><div class="metric">${summary.uniqueSessions}</div></div>
     <div class="card"><div>Visits</div><div class="metric">${summary.byType.visit || 0}</div></div>
     <div class="card"><div>Saved Images</div><div class="metric">${summary.byType.save_image || 0}</div></div>
+    <div class="card"><div>Share Link</div><div class="metric">${summary.byType.share_link || 0}</div></div>
     <div class="card">
-      <div>Top 5 Selected Characters</div>
-      <table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSelectedCharacters, 'No data yet')}</tbody></table>
+      <div>Unit Winners by Selection</div>
+      <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.selectedUnitLeaders, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
-      <div>Top 5 Saved Characters</div>
-      <table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSavedCharacters, 'No data yet')}</tbody></table>
+      <div>Unit Winners by Save</div>
+      <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.savedUnitLeaders, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
       <div>Top 5 Selected Units</div>
