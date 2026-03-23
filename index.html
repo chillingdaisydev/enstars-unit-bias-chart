@@ -1195,7 +1195,7 @@ function getShareText() {
   const titleText = nickname
     ? (currentLang === 'ja' ? `${nickname}のあんスタ推し` : currentLang === 'en' ? `${nickname}'s Enstars Bias Chart` : `${nickname}의 앙스타 유닛별 최애캐`)
     : (currentLang === 'ja' ? 'あんスタ推し' : currentLang === 'en' ? 'Enstars Unit Bias Chart' : '앙스타 유닛별 최애캐');
-  const hashtags = '#앙스타 #최애캐 #enstars #あんスタ';
+  const hashtags = '#あんスタ #偶像夢幻祭 #enstars #앙스타 #최애캐';
   const siteUrl = window.location.origin + window.location.pathname;
   return { titleText, hashtags, url: siteUrl, full: `${titleText}\n${hashtags}\n${siteUrl}` };
 }
