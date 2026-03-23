@@ -224,6 +224,7 @@ function summarizeEvents() {
     uniqueSessions: 0,
     byType: {},
     dailyEvents: {},
+    dailyVisits: {},
     selectedCharacters: {},
     savedCharacters: {},
     selectedUnits: {},
@@ -248,6 +249,9 @@ function summarizeEvents() {
 
       if (event.recordedAt) {
         incrementCounter(summary.dailyEvents, event.recordedAt.slice(0, 10));
+        if (event.eventType === 'visit') {
+          incrementCounter(summary.dailyVisits, event.recordedAt.slice(0, 10));
+        }
       }
 
       if (event.eventType === 'select_character') {
@@ -277,6 +281,7 @@ function summarizeEvents() {
   summary.selectedUnitLeaders = buildUnitLeaders(summary.selectedCharactersByUnit);
   summary.savedUnitLeaders = buildUnitLeaders(summary.savedCharactersByUnit);
   summary.recentDays = sortedEntries(summary.dailyEvents, 14);
+  summary.recentVisits = sortedEntries(summary.dailyVisits, 14).reverse();
 
   return summary;
 }
@@ -294,6 +299,24 @@ function buildDashboardHtml(summary) {
       return `<tr><td colspan="3">${emptyLabel}</td></tr>`;
     }
     return items.map((item) => `<tr><td>${item.unitLabel}</td><td>${item.characterLabel}</td><td>${item.count}</td></tr>`).join('');
+  };
+
+  const renderVisitBars = (items) => {
+    if (!items.length) {
+      return '<div class="empty-state">No visit data yet</div>';
+    }
+
+    const maxCount = Math.max(...items.map((item) => item.count), 1);
+    return `<div class="visit-chart">${
+      items.map((item) => {
+        const height = Math.max(12, Math.round((item.count / maxCount) * 140));
+        return `<div class="visit-bar-wrap">
+          <div class="visit-count">${item.count}</div>
+          <div class="visit-bar" style="height:${height}px"></div>
+          <div class="visit-label">${item.key.slice(5)}</div>
+        </div>`;
+      }).join('')
+    }</div>`;
   };
 
   return `<!DOCTYPE html>
@@ -343,6 +366,24 @@ function buildDashboardHtml(summary) {
     th { font-size: 13px; color: var(--muted); }
     td { color: var(--text); }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .span-2 { grid-column: span 2; }
+    .visit-chart { display: flex; align-items: end; gap: 10px; min-height: 190px; margin-top: 16px; padding-top: 8px; }
+    .visit-bar-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 8px; }
+    .visit-bar {
+      width: 100%;
+      max-width: 42px;
+      border-radius: 12px 12px 6px 6px;
+      background: linear-gradient(180deg, #67e8f9 0%, #38bdf8 45%, #2563eb 100%);
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.28);
+    }
+    .visit-count { font-size: 12px; color: var(--text); }
+    .visit-label { font-size: 11px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .empty-state { margin-top: 16px; color: var(--muted); }
+    @media (max-width: 900px) {
+      .span-2 { grid-column: span 1; }
+      .visit-chart { gap: 6px; }
+      .visit-label { font-size: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -354,6 +395,10 @@ function buildDashboardHtml(summary) {
     <div class="card"><div>Visits</div><div class="metric">${summary.byType.visit || 0}</div></div>
     <div class="card"><div>Saved Images</div><div class="metric">${summary.byType.save_image || 0}</div></div>
     <div class="card"><div>Share Link</div><div class="metric">${summary.byType.share_link || 0}</div></div>
+    <div class="card span-2">
+      <div>Daily Visits</div>
+      ${renderVisitBars(summary.recentVisits)}
+    </div>
     <div class="card">
       <div>Unit Winners by Selection</div>
       <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.selectedUnitLeaders, 'No data yet')}</tbody></table>
