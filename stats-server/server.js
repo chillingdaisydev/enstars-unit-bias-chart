@@ -243,6 +243,8 @@ function summarizeEvents() {
     byType: {},
     dailyEvents: {},
     dailyVisits: {},
+    savesWithNickname: 0,
+    savesWithoutNickname: 0,
     selectedCharacters: {},
     savedCharacters: {},
     selectedUnits: {},
@@ -279,6 +281,11 @@ function summarizeEvents() {
       }
 
       if (event.eventType === 'save_image') {
+        if (event.hasNickname) {
+          summary.savesWithNickname += 1;
+        } else {
+          summary.savesWithoutNickname += 1;
+        }
         const selections = safeObject(event.selections);
         for (const [unitId, characterId] of Object.entries(selections)) {
           incrementCounter(summary.savedUnits, unitId);
@@ -302,6 +309,10 @@ function summarizeEvents() {
   summary.savedUnitRankings = buildUnitFullRankings(summary.savedCharactersByUnit);
   summary.recentDays = sortedEntries(summary.dailyEvents, 14);
   summary.recentVisits = sortedEntries(summary.dailyVisits, 14).reverse();
+  const totalSaveEvents = (summary.byType.save_image || 0);
+  summary.nicknameSaveRate = totalSaveEvents > 0
+    ? Math.round((summary.savesWithNickname / totalSaveEvents) * 100)
+    : 0;
 
   return summary;
 }
@@ -391,6 +402,7 @@ function buildDashboardHtml(summary) {
       backdrop-filter: blur(12px);
     }
     .metric { font-size: 30px; font-weight: 800; margin-top: 10px; color: var(--metric); text-shadow: 0 0 24px var(--glow); }
+    .metric-sub { margin-top: 8px; font-size: 12px; color: var(--muted); }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     th, td { text-align: left; padding: 8px 0; border-bottom: 1px solid var(--line); }
     th { font-size: 13px; color: var(--muted); }
@@ -433,6 +445,11 @@ function buildDashboardHtml(summary) {
     <div class="card"><div>Visits</div><div class="metric">${summary.byType.visit || 0}</div></div>
     <div class="card"><div>Saved Images</div><div class="metric">${summary.byType.save_image || 0}</div></div>
     <div class="card"><div>Share Link</div><div class="metric">${summary.byType.share_link || 0}</div></div>
+    <div class="card">
+      <div>Nickname on Save</div>
+      <div class="metric">${summary.nicknameSaveRate}%</div>
+      <div class="metric-sub">${summary.savesWithNickname} / ${(summary.byType.save_image || 0)} saves</div>
+    </div>
     <div class="card span-2">
       <div>Daily Visits</div>
       ${renderVisitBars(summary.recentVisits)}
