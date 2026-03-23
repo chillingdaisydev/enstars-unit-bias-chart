@@ -445,16 +445,8 @@ function buildDashboardHtml(summary) {
       ${renderVisitBars(summary.recentVisits)}
     </div>
     <div class="card">
-      <div>Unit Winners by Selection</div>
-      <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.selectedUnitLeaders, 'No data yet')}</tbody></table>
-    </div>
-    <div class="card">
       <div>Unit Winners by Save</div>
       <table><thead><tr><th>Unit</th><th>Winner</th><th>Count</th></tr></thead><tbody>${renderLeaderRows(summary.savedUnitLeaders, 'No data yet')}</tbody></table>
-    </div>
-    <div class="card">
-      <div>Top 5 Selected Units</div>
-      <table><thead><tr><th>Unit</th><th>Count</th></tr></thead><tbody>${renderRows(summary.topSelectedUnits, 'No data yet')}</tbody></table>
     </div>
     <div class="card">
       <div>Top 5 Saved Units</div>
@@ -467,10 +459,6 @@ function buildDashboardHtml(summary) {
     <div class="card span-2">
       <div style="font-size:18px;font-weight:700;margin-bottom:12px">📊 Unit Rankings (by Save)</div>
       ${renderUnitRankings(summary.savedUnitRankings)}
-    </div>
-    <div class="card span-2">
-      <div style="font-size:18px;font-weight:700;margin-bottom:12px">🖱️ Unit Rankings (by Selection)</div>
-      ${renderUnitRankings(summary.selectedUnitRankings)}
     </div>
   </div>
 </body>
