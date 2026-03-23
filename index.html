@@ -57,7 +57,7 @@
     font-family: 'Gaegu', cursive;
     font-weight: 700;
     letter-spacing: 2px;
-    white-space: nowrap;
+    word-break: keep-all;
   }
 
   .subtitle {
@@ -601,8 +601,8 @@ const I18N = {
     toastLink: '링크가 복사되었습니다!',
     toastReset: '초기화되었습니다',
     nickPlaceholder: '닉네임 입력',
-    titleWithName: (name) => `${name}의<br><span style="white-space:nowrap">⭐ 앙스타 유닛별 최애캐 ⭐</span>`,
-    titleNoName: '⭐ 앙스타 유닛별 최애캐 ⭐',
+    titleWithName: (name) => `${name}의<br><span style="white-space:nowrap">⭐ 앙스타</span> <span style="white-space:nowrap">유닛별 최애캐 ⭐</span>`,
+    titleNoName: '<span style="white-space:nowrap">⭐ 앙스타</span> <span style="white-space:nowrap">유닛별 최애캐 ⭐</span>',
     names: {
       eichi: '텐쇼인 에이치', wataru: '히비키 와타루', tori: '히메미야 토리', yuzuru: '후시미 유즈루',
       subaru: '아케호시 스바루', hokuto: '히다카 호쿠토', makoto: '유우키 마코토', mao: '이사라 마오',
@@ -634,8 +634,8 @@ const I18N = {
     toastLink: 'リンクをコピーしました！',
     toastReset: 'リセットしました',
     nickPlaceholder: 'ニックネーム入力',
-    titleWithName: (name) => `${name}の<br><span style="white-space:nowrap">⭐ あんスタ ユニット別推し ⭐</span>`,
-    titleNoName: '⭐ あんスタ ユニット別推し ⭐',
+    titleWithName: (name) => `${name}の<br><span style="white-space:nowrap">⭐ あんスタ</span> <span style="white-space:nowrap">ユニット別推し ⭐</span>`,
+    titleNoName: '<span style="white-space:nowrap">⭐ あんスタ</span> <span style="white-space:nowrap">ユニット別推し ⭐</span>',
     names: {
       eichi: '天祥院英智', wataru: '日々樹渉', tori: '姫宮桃李', yuzuru: '伏見弓弦',
       subaru: '明星スバル', hokuto: '氷鷹北斗', makoto: '遊木真', mao: '衣更真緒',
@@ -667,8 +667,8 @@ const I18N = {
     toastLink: 'Link copied!',
     toastReset: 'Reset complete',
     nickPlaceholder: 'Enter nickname',
-    titleWithName: (name) => `${name}'s<br><span style="white-space:nowrap">⭐ Enstars Unit Bias ⭐</span>`,
-    titleNoName: '⭐ Enstars Unit Bias Chart ⭐',
+    titleWithName: (name) => `${name}'s<br><span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias ⭐</span>`,
+    titleNoName: '<span style="white-space:nowrap">⭐ Enstars</span> <span style="white-space:nowrap">Unit Bias Chart ⭐</span>',
     names: {
       eichi: 'Eichi Tenshouin', wataru: 'Wataru Hibiki', tori: 'Tori Himemiya', yuzuru: 'Yuzuru Fushimi',
       subaru: 'Subaru Akehoshi', hokuto: 'Hokuto Hidaka', makoto: 'Makoto Yuuki', mao: 'Mao Isara',
