@@ -347,6 +347,7 @@
     <option value="en">🇺🇸 English</option>
     <option value="zh-TW">🇹🇼 繁體中文</option>
     <option value="id">🇮🇩 Indonesia</option>
+    <option value="th">🇹🇭 ภาษาไทย</option>
   </select>
 </div>
 
@@ -758,6 +759,39 @@ const I18N = {
       kaname: 'Kaname Tojo', gatekeeper: 'Gatekeeper', seiya: 'Seiya Hidaka',
       hitsugi: 'Hitsugi Kurone', anzu: 'Anzu',
     }
+  },
+  th: {
+    title: 'Enstars Unit Bias Chart',
+    subtitle: 'คลิกยูนิตเพื่อเลือกตัวละครที่ชอบ!',
+    save: 'บันทึกรูป', share: 'แชร์ลิงก์', reset: 'รีเซ็ต',
+    close: 'ปิด', noSelect: 'ไม่เลือก',
+    toastSaved: 'บันทึกรูปแล้ว!',
+    toastLink: 'คัดลอกลิงก์แล้ว!',
+    toastReset: 'รีเซ็ตแล้ว',
+    nickPlaceholder: 'ใส่ชื่อเล่น',
+    titleWithName: (name) => `${name}'s<br>Enstars Unit Bias`,
+    titleNoName: 'Enstars Unit Bias Chart',
+    names: {
+      eichi: 'เอจิ เท็นโชอิน', wataru: 'วาตารุ ฮิบิกิ', tori: 'โทริ ฮิเมมิยะ', yuzuru: 'ยุซุรุ ฟุชิมิ',
+      subaru: 'สุบารุ อาเกโฮชิ', hokuto: 'โฮคุโตะ ฮิดากะ', makoto: 'มาโกโตะ ยูกิ', mao: 'มาโอ อิซาระ',
+      chiaki: 'ชิอากิ โมริซาวะ', kanata: 'คานาตะ ชินไก', tetora: 'เตโตระ นากุโมะ', midori: 'มิโดริ ทาคามิเนะ', shinobu: 'ชิโนบุ เซ็นโกคุ',
+      hiiro: 'ฮิอิโระ อามากิ', aira: 'ไอระ ชิราโทริ', mayoi: 'มาโยอิ อายาเสะ', tatsumi: 'ทัตสึมิ คาเซฮายะ',
+      nagisa: 'นากิสะ รัน', hiyori: 'ฮิโยริ โทโมเอะ', ibara: 'อิบาระ ซาเอกุสะ', jun: 'จุน ซาซานามิ',
+      shu: 'ชู อิตสึกิ', mika: 'มิกะ คาเงฮิระ',
+      hinata: 'ฮินาตะ อาโออิ', yuta: 'ยูตะ อาโออิ',
+      rinne: 'รินเนะ อามากิ', himeru: 'HiMERU', kohaku: 'โคฮาคุ โอคาวะ', niki: 'นิกิ ชิอินะ',
+      rei: 'เรย์ ซากุมะ', kaoru: 'คาโอรุ ฮาคาเซะ', koga: 'โคกะ โอกามิ', adonis: 'อโดนิส โอโตการิ',
+      nazuna: 'นาซึนะ นิโตะ', mitsuru: 'มิตสึรุ เท็นมะ', hajime: 'ฮาจิเมะ ชิโนะ', tomoya: 'โทโมยะ มาชิโระ',
+      keito: 'เคโตะ ฮาสึมิ', kuro: 'คุโระ คิริว', souma: 'โซมะ คันซากิ', ibuki: 'อิบุกิ ทากิ',
+      chitose: 'ชิโตเสะ สึซึระ', juis: 'จุยส์ โคจิกะ', mashu: 'มาชู คุออน', nozomi: 'โนโซมิ มาโดกะ',
+      leo: 'เลโอ สึกินากะ', izumi: 'อิซึมิ เซนะ', arashi: 'อาราชิ นารุคามิ', ritsu: 'ริตสึ ซากุมะ', tsukasa: 'สึคาสะ ซุโอ',
+      natsume: 'นัตสึเมะ ซากาซากิ', tsumugi: 'สึมุกิ อาโอบะ', sora: 'โซระ ฮารุคาวะ',
+      madara: 'มาดาระ มิเคจิมะ',
+      esu: 'เอสุ', kanna: 'คันนะ', raika: 'ไรกะ', yume: 'ยูเมะ',
+      jin: 'จิน ซากามิ', akiomi: 'อากิโอมิ คุนุกิ', nice: 'ไนซ์',
+      kaname: 'คานาเมะ โทโจ', gatekeeper: 'ผู้รักษาประตู', seiya: 'เซย์ยะ ฮิดากะ',
+      hitsugi: 'ฮิตสึกิ คุโรเนะ', anzu: 'อันซึ',
+    }
   }
 };
 
@@ -854,6 +888,7 @@ function detectLang() {
   if (browserLang.startsWith('ja')) return 'ja';
   if (browserLang.startsWith('zh')) return 'zh-TW';
   if (browserLang.startsWith('id') || browserLang.startsWith('ms')) return 'id';
+  if (browserLang.startsWith('th')) return 'th';
   if (browserLang.startsWith('en')) return 'en';
   if (browserLang.startsWith('ko')) return 'ko';
   return 'en';
