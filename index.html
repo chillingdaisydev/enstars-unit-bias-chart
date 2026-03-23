@@ -12,6 +12,11 @@
 </script>
 <meta name="google-site-verification" content="NXZ4qCNZp8JK-ZB9mNlm9N36w-Edc5MnprL_VU-N978" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#667eea">
 <meta name="description" content="앙상블 스타즈 유닛별로 최애 캐릭터를 골라보세요! Pick your favorite Ensemble Stars character per unit! あんスタ推しキャラを選ぼう！">
 <meta name="keywords" content="앙상블 스타즈, 앙스타, 최애캐, 최애, ensemble stars, enstars, あんスタ, 推し, bias chart, unit">
 <link rel="canonical" href="https://chillingdaisydev.github.io/enstars-unit-bias-chart/">
@@ -629,7 +634,7 @@ const I18N = {
     toastReset: 'リセットしました',
     nickPlaceholder: 'ニックネーム入力',
     titleWithName: (name) => `${name}の<br>⭐ あんスタ ユニット別推し ⭐`,
-    titleNoName: '⭐ あんスタ ユニット別推し ⭐',
+    titleNoName: '⭐ あんスタ<br>ユニット別推し ⭐',
     names: {
       eichi: '天祥院英智', wataru: '日々樹渉', tori: '姫宮桃李', yuzuru: '伏見弓弦',
       subaru: '明星スバル', hokuto: '氷鷹北斗', makoto: '遊木真', mao: '衣更真緒',
@@ -662,7 +667,7 @@ const I18N = {
     toastReset: 'Reset complete',
     nickPlaceholder: 'Enter nickname',
     titleWithName: (name) => `${name}'s<br>⭐ Enstars Unit Bias ⭐`,
-    titleNoName: '⭐ Enstars Unit Bias Chart ⭐',
+    titleNoName: '⭐ Enstars<br>Unit Bias Chart ⭐',
     names: {
       eichi: 'Eichi Tenshouin', wataru: 'Wataru Hibiki', tori: 'Tori Himemiya', yuzuru: 'Yuzuru Fushimi',
       subaru: 'Subaru Akehoshi', hokuto: 'Hokuto Hidaka', makoto: 'Makoto Yuuki', mao: 'Mao Isara',
@@ -792,6 +797,10 @@ function init() {
     selectionCount: getSelectionCount(),
     selectionCode: encodeSelections(),
   });
+  // PWA Service Worker 등록
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 }
 
 function render() {
