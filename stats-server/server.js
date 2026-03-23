@@ -218,6 +218,24 @@ function buildUnitLeaders(counterMap) {
     .filter((item) => item.count > 0);
 }
 
+function buildUnitFullRankings(counterMap) {
+  return Object.keys(UNIT_LABELS)
+    .map((unitId) => {
+      const allEntries = sortedEntries(counterMap[unitId] || {}, 50);
+      return {
+        unitId,
+        unitLabel: UNIT_LABELS[unitId] || unitId,
+        rankings: allEntries.map((entry, idx) => ({
+          rank: idx + 1,
+          characterId: entry.key,
+          characterLabel: CHARACTER_LABELS[entry.key] || entry.key,
+          count: entry.count,
+        })),
+      };
+    })
+    .filter((item) => item.rankings.length > 0);
+}
+
 function summarizeEvents() {
   const summary = {
     totalEvents: 0,
@@ -280,6 +298,8 @@ function summarizeEvents() {
   summary.topSavedUnits = labelEntries(sortedEntries(summary.savedUnits, 5), UNIT_LABELS);
   summary.selectedUnitLeaders = buildUnitLeaders(summary.selectedCharactersByUnit);
   summary.savedUnitLeaders = buildUnitLeaders(summary.savedCharactersByUnit);
+  summary.selectedUnitRankings = buildUnitFullRankings(summary.selectedCharactersByUnit);
+  summary.savedUnitRankings = buildUnitFullRankings(summary.savedCharactersByUnit);
   summary.recentDays = sortedEntries(summary.dailyEvents, 14);
   summary.recentVisits = sortedEntries(summary.dailyVisits, 14).reverse();
 
@@ -299,6 +319,23 @@ function buildDashboardHtml(summary) {
       return `<tr><td colspan="3">${emptyLabel}</td></tr>`;
     }
     return items.map((item) => `<tr><td>${item.unitLabel}</td><td>${item.characterLabel}</td><td>${item.count}</td></tr>`).join('');
+  };
+
+  const renderUnitRankings = (rankings) => {
+    if (!rankings.length) return '<p class="empty-state">No data yet</p>';
+    return rankings.map((unit) => {
+      const rows = unit.rankings.map((r) => {
+        const medal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : `${r.rank}.`;
+        const barWidth = unit.rankings[0].count > 0 ? Math.round((r.count / unit.rankings[0].count) * 100) : 0;
+        return `<div class="rank-row">
+          <span class="rank-medal">${medal}</span>
+          <span class="rank-name">${r.characterLabel}</span>
+          <div class="rank-bar-bg"><div class="rank-bar" style="width:${barWidth}%"></div></div>
+          <span class="rank-count">${r.count}</span>
+        </div>`;
+      }).join('');
+      return `<div class="unit-ranking-card"><div class="unit-ranking-title">${unit.unitLabel}</div>${rows}</div>`;
+    }).join('');
   };
 
   const renderVisitBars = (items) => {
@@ -379,6 +416,14 @@ function buildDashboardHtml(summary) {
     .visit-count { font-size: 12px; color: var(--text); }
     .visit-label { font-size: 11px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .empty-state { margin-top: 16px; color: var(--muted); }
+    .unit-ranking-card { margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--line); }
+    .unit-ranking-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: var(--metric); }
+    .rank-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+    .rank-medal { width: 24px; text-align: center; flex-shrink: 0; }
+    .rank-name { width: 120px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-bar-bg { flex: 1; height: 14px; background: rgba(255,255,255,0.06); border-radius: 7px; overflow: hidden; }
+    .rank-bar { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 7px; transition: width 0.3s; }
+    .rank-count { width: 40px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); flex-shrink: 0; }
     @media (max-width: 900px) {
       .span-2 { grid-column: span 1; }
       .visit-chart { gap: 6px; }
@@ -418,6 +463,14 @@ function buildDashboardHtml(summary) {
     <div class="card">
       <div>Recent Days</div>
       <table><thead><tr><th>Date</th><th>Events</th></tr></thead><tbody>${renderRows(summary.recentDays, 'No data yet')}</tbody></table>
+    </div>
+    <div class="card span-2">
+      <div style="font-size:18px;font-weight:700;margin-bottom:12px">📊 Unit Rankings (by Save)</div>
+      ${renderUnitRankings(summary.savedUnitRankings)}
+    </div>
+    <div class="card span-2">
+      <div style="font-size:18px;font-weight:700;margin-bottom:12px">🖱️ Unit Rankings (by Selection)</div>
+      ${renderUnitRankings(summary.selectedUnitRankings)}
     </div>
   </div>
 </body>
