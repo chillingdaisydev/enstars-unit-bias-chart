@@ -1075,16 +1075,25 @@ function saveAsImage() {
         const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
         navigator.share({ files: [file] }).then(() => {
           showToast(t('toastSaved'));
-        }).catch(() => {
-          // share 취소 시 fallback
+        }).catch(err => {
+          gtag('event', 'share_error', {
+            error_message: err?.message || 'share failed',
+            user_agent: navigator.userAgent
+          });
           fallbackDownload(blob);
         });
       } else {
         fallbackDownload(blob);
       }
     }, 'image/png');
-  }).catch(() => {
+  }).catch(err => {
     document.body.removeChild(container);
+    gtag('event', 'save_error', {
+      error_message: err?.message || 'html2canvas failed',
+      user_agent: navigator.userAgent,
+      screen_size: window.innerWidth + 'x' + window.innerHeight
+    });
+    showToast('⚠️ ' + t('toastSaved') + ' (error)');
   });
 }
 
