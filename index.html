@@ -1070,24 +1070,7 @@ function saveAsImage() {
         selectionCode: encodeSelections(),
         selections: getSelectionSnapshot(),
       });
-      // 모바일/태블릿: Web Share API 시도
-      const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isMobile && navigator.share) {
-        const file = new File([blob], 'enstar_favorites.png', { type: 'image/png' });
-        const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
-        if (canShareFiles) {
-          navigator.share({ files: [file] }).catch(err => {
-            if (err.name !== 'AbortError') {
-              gtag('event', 'share_error', { error_message: err?.message, user_agent: navigator.userAgent });
-              fallbackDownload(blob);
-            }
-          });
-        } else {
-          fallbackDownload(blob);
-        }
-      } else {
-        fallbackDownload(blob);
-      }
+      fallbackDownload(blob);
     }, 'image/png');
   }).catch(err => {
     document.body.removeChild(container);
